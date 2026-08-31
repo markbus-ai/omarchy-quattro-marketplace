@@ -25,7 +25,7 @@ const { theme } = Astro.props;
   data-theme-color={theme.color_family}
   data-theme-tags={theme.tags.join(',')}
 >
-  <a href={`/themes/${theme.slug}`} class="block focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-lg">
+  <a href={`${import.meta.env.BASE_URL}/themes/${theme.slug}`} class="block focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-lg">
     {/* Preview image */}
     <div class="relative aspect-[16/10] overflow-hidden rounded-t-lg bg-background">
       <img
