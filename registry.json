@@ -43,7 +43,8 @@
       "color13": "#f5c2e7",
       "color14": "#94e2d5",
       "color15": "#a6adc8",
-      "accent": "#cba6f7"
+      "accent": "#cba6f7",
+      "comment": "#6c7086"
     }
   },
   {
@@ -90,7 +91,8 @@
       "color13": "#ff92df",
       "color14": "#a4ffff",
       "color15": "#ffffff",
-      "accent": "#bd93f9"
+      "accent": "#bd93f9",
+      "comment": "#6272a4"
     }
   },
   {
@@ -137,7 +139,8 @@
       "color13": "#d3869b",
       "color14": "#8ec07c",
       "color15": "#ebdbb2",
-      "accent": "#fe8019"
+      "accent": "#fe8019",
+      "comment": "#928374"
     }
   },
   {
@@ -184,7 +187,8 @@
       "color13": "#b48ead",
       "color14": "#88c0d0",
       "color15": "#eceff4",
-      "accent": "#88c0d0"
+      "accent": "#88c0d0",
+      "comment": "#4c566a"
     }
   },
   {
@@ -231,7 +235,8 @@
       "color13": "#bb9af7",
       "color14": "#7dcfff",
       "color15": "#c0caf5",
-      "accent": "#7aa2f7"
+      "accent": "#7aa2f7",
+      "comment": "#565f89"
     }
   }
 ]

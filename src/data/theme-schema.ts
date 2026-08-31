@@ -41,6 +41,9 @@ export const PALETTE_KEYS = [
 
   // Accent
   "accent",
+
+  // Comment color (used for comments, muted text)
+  "comment",
 ] as const;
 
 export type PaletteKey = (typeof PALETTE_KEYS)[number];

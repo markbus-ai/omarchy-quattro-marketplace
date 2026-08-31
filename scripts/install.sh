@@ -59,7 +59,7 @@ validate_hex() {
 # Fetch registry
 # ---------------------------------------------------------------------------
 fetch_registry() {
-  info "Fetching theme registry..."
+  info "Fetching theme registry..." >&2
   local registry
   registry=$(curl -fsSL "$REGISTRY_URL") || die "Failed to fetch registry from $REGISTRY_URL"
   echo "$registry"
