@@ -96,7 +96,7 @@ const CAPABILITY_PATTERNS = [
   {
     id: "shell-script",
     description: "Shell scripts present",
-    regex: /\b(?:#!/.*(?:sh|bash|zsh|fish))/gi,
+    regex: /#!\/.*(?:sh|bash|zsh|fish)/gi,
     fileTypes: [".sh", ".bash", ".zsh", ".fish"],
   },
   {
