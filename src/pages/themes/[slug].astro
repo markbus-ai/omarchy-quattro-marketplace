@@ -143,11 +143,11 @@ const installCommand = `omarchy-install-theme ${theme.slug}`;
           <h2 class="text-sm font-medium text-muted-foreground mb-2">Install</h2>
           <div class="flex items-center gap-2">
             <code class="flex-1 rounded bg-surface px-3 py-2 text-xs text-foreground font-mono overflow-x-auto">
-              git clone --depth 1 https://github.com/markbus-ai/omarchy-quattro-marketplace.git /tmp/omarchy-marketplace &amp;&amp; cp -r /tmp/omarchy-marketplace/themes/{theme.slug} ~/.config/omarchy/themes/ &amp;&amp; rm -rf /tmp/omarchy-marketplace &amp;&amp; echo "✔ Done! Run: omarchy theme set {theme.slug}"
+              git clone --depth 1 --filter=blob:none --sparse https://github.com/markbus-ai/omarchy-quattro-marketplace.git /tmp/omarchy-marketplace &amp;&amp; cd /tmp/omarchy-marketplace &amp;&amp; git sparse-checkout set themes/{theme.slug} &amp;&amp; cp -r themes/{theme.slug} ~/.config/omarchy/themes/ &amp;&amp; cd ~ &amp;&amp; rm -rf /tmp/omarchy-marketplace
             </code>
             <button
               class="shrink-0 rounded-md border border-border bg-background px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:border-accent/50 hover:text-accent"
-              onclick={`navigator.clipboard.writeText('git clone --depth 1 https://github.com/markbus-ai/omarchy-quattro-marketplace.git /tmp/omarchy-marketplace && cp -r /tmp/omarchy-marketplace/themes/${theme.slug} ~/.config/omarchy/themes/ && rm -rf /tmp/omarchy-marketplace && echo "✔ Installed! Run: omarchy theme set ${theme.slug}"'); this.textContent='✔ Copied!'; setTimeout(()=>this.textContent='Copy',1500)`}
+              onclick={`navigator.clipboard.writeText('git clone --depth 1 --filter=blob:none --sparse https://github.com/markbus-ai/omarchy-quattro-marketplace.git /tmp/omarchy-marketplace && cd /tmp/omarchy-marketplace && git sparse-checkout set themes/${theme.slug} && cp -r themes/${theme.slug} ~/.config/omarchy/themes/ && cd ~ && rm -rf /tmp/omarchy-marketplace && echo "✔ Installed! Run: omarchy theme set ${theme.slug}"'); this.textContent='✔ Copied!'; setTimeout(()=>this.textContent='Copy',1500)`}
             >
               Copy
             </button>
