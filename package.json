@@ -14,7 +14,8 @@
     "validate": "tsx scripts/validate-themes.ts",
     "search:dev": "pagefind --site dist --serve",
     "intake": "node scripts/intake-submission.mjs",
-    "validate-repo": "node scripts/validate-theme-repo.mjs"
+    "validate-repo": "node scripts/validate-theme-repo.mjs",
+    "publish-report": "node scripts/publish-report.mjs"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
