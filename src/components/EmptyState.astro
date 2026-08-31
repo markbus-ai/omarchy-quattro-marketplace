@@ -1,0 +1,23 @@
+---
+/**
+ * EmptyState.astro — Reusable empty state component.
+ *
+ * Displays a message and optional icon when no content is available.
+ */
+
+interface Props {
+  title: string;
+  description?: string;
+  icon?: string;
+}
+
+const { title, description, icon = '📂' } = Astro.props;
+---
+
+<div role="status" class="flex flex-col items-center justify-center py-16 text-center">
+  <span class="text-4xl" aria-hidden="true">{icon}</span>
+  <h3 class="mt-4 text-lg font-medium text-foreground">{title}</h3>
+  {description && (
+    <p class="mt-2 max-w-md text-sm text-muted-foreground">{description}</p>
+  )}
+</div>
