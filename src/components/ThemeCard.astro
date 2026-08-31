@@ -18,6 +18,12 @@ const { theme } = Astro.props;
 <article
   class="group rounded-lg border border-border bg-surface transition-colors hover:border-accent/50"
   aria-label={`Theme: ${theme.name} by ${theme.author}`}
+  data-theme-card
+  data-theme-name={theme.name.toLowerCase()}
+  data-theme-author={theme.author.toLowerCase()}
+  data-theme-mood={theme.mood.join(',')}
+  data-theme-color={theme.color_family}
+  data-theme-tags={theme.tags.join(',')}
 >
   <a href={`/themes/${theme.slug}`} class="block focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-lg">
     {/* Preview image */}

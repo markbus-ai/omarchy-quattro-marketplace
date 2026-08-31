@@ -1,0 +1,175 @@
+---
+/**
+ * FilterBar.astro — Mood, color_family, and tags filter toggles.
+ *
+ * Features:
+ * - aria-pressed toggle buttons for each filter value
+ * - "Clear all" button to reset all filters
+ * - Dispatches "filter-change" CustomEvent on the document
+ * - Collects unique tags from registry data
+ */
+
+import { MOOD_VALUES, COLOR_FAMILY_VALUES, type ThemeRegistry } from '../data/theme-schema';
+
+interface Props {
+  registry: ThemeRegistry;
+}
+
+const { registry } = Astro.props;
+
+// Collect unique tags from all themes
+const allTags = [...new Set(registry.flatMap((theme) => theme.tags))].sort();
+---
+
+<div class="space-y-4" data-filter-bar>
+  {/* Mood filters */}
+  <fieldset>
+    <legend class="text-sm font-medium text-foreground mb-2">Mood</legend>
+    <div class="flex flex-wrap gap-2" data-filter-group="mood">
+      {MOOD_VALUES.map((mood) => (
+        <button
+          type="button"
+          aria-pressed="false"
+          data-filter-value={mood}
+          class="inline-flex items-center rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-accent/50 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background data-[pressed=true]:border-accent data-[pressed=true]:bg-accent/10 data-[pressed=true]:text-accent"
+        >
+          {mood}
+        </button>
+      ))}
+    </div>
+  </fieldset>
+
+  {/* Color family filters */}
+  <fieldset>
+    <legend class="text-sm font-medium text-foreground mb-2">Color</legend>
+    <div class="flex flex-wrap gap-2" data-filter-group="color_family">
+      {COLOR_FAMILY_VALUES.map((color) => (
+        <button
+          type="button"
+          aria-pressed="false"
+          data-filter-value={color}
+          class="inline-flex items-center rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-accent/50 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background data-[pressed=true]:border-accent data-[pressed=true]:bg-accent/10 data-[pressed=true]:text-accent"
+        >
+          {color}
+        </button>
+      ))}
+    </div>
+  </fieldset>
+
+  {/* Tags filters */}
+  {allTags.length > 0 && (
+    <fieldset>
+      <legend class="text-sm font-medium text-foreground mb-2">Tags</legend>
+      <div class="flex flex-wrap gap-2" data-filter-group="tags">
+        {allTags.map((tag) => (
+          <button
+            type="button"
+            aria-pressed="false"
+            data-filter-value={tag}
+            class="inline-flex items-center rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-accent/50 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background data-[pressed=true]:border-accent data-[pressed=true]:bg-accent/10 data-[pressed=true]:text-accent"
+          >
+            {tag}
+          </button>
+        ))}
+      </div>
+    </fieldset>
+  )}
+
+  {/* Clear all button */}
+  <button
+    type="button"
+    data-clear-filters
+    class="hidden text-sm text-accent hover:text-accent/80 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+  >
+    Clear all filters
+  </button>
+</div>
+
+<script>
+  function initFilterBar() {
+    const filterBar = document.querySelector('[data-filter-bar]');
+    if (!filterBar) return;
+
+    const toggleButtons = filterBar.querySelectorAll('button[data-filter-value]');
+    const clearButton = filterBar.querySelector('[data-clear-filters]') as HTMLButtonElement;
+
+    // Handle toggle clicks
+    toggleButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const btn = button as HTMLButtonElement;
+        const isPressed = btn.getAttribute('aria-pressed') === 'true';
+        btn.setAttribute('aria-pressed', String(!isPressed));
+        btn.dataset.pressed = String(!isPressed);
+
+        // Dispatch filter change event
+        dispatchFilterChange();
+        updateClearButtonVisibility();
+      });
+    });
+
+    // Handle clear all
+    clearButton?.addEventListener('click', () => {
+      toggleButtons.forEach((button) => {
+        const btn = button as HTMLButtonElement;
+        btn.setAttribute('aria-pressed', 'false');
+        btn.dataset.pressed = 'false';
+      });
+
+      // Also clear search input
+      const searchInput = document.querySelector('[data-search-input]') as HTMLInputElement;
+      if (searchInput) searchInput.value = '';
+
+      dispatchFilterChange();
+      updateClearButtonVisibility();
+    });
+
+    function dispatchFilterChange() {
+      const activeFilters = getActiveFilters();
+      document.dispatchEvent(
+        new CustomEvent('filter-change', {
+          detail: activeFilters,
+          bubbles: true,
+        })
+      );
+    }
+
+    function getActiveFilters() {
+      const mood: string[] = [];
+      const colorFamily: string[] = [];
+      const tags: string[] = [];
+
+      filterBar.querySelectorAll('[data-filter-group="mood"] button[aria-pressed="true"]').forEach((btn) => {
+        mood.push((btn as HTMLButtonElement).dataset.filterValue!);
+      });
+
+      filterBar.querySelectorAll('[data-filter-group="color_family"] button[aria-pressed="true"]').forEach((btn) => {
+        colorFamily.push((btn as HTMLButtonElement).dataset.filterValue!);
+      });
+
+      filterBar.querySelectorAll('[data-filter-group="tags"] button[aria-pressed="true"]').forEach((btn) => {
+        tags.push((btn as HTMLButtonElement).dataset.filterValue!);
+      });
+
+      const searchInput = document.querySelector('[data-search-input]') as HTMLInputElement;
+      const search = searchInput?.value.trim() ?? '';
+
+      return { mood, colorFamily, tags, search };
+    }
+
+    function updateClearButtonVisibility() {
+      const activeFilters = getActiveFilters();
+      const hasActiveFilters =
+        activeFilters.mood.length > 0 ||
+        activeFilters.colorFamily.length > 0 ||
+        activeFilters.tags.length > 0 ||
+        activeFilters.search.length > 0;
+
+      if (clearButton) {
+        clearButton.classList.toggle('hidden', !hasActiveFilters);
+      }
+    }
+  }
+
+  initFilterBar();
+  document.addEventListener('astro:page-load', initFilterBar);
+</script>

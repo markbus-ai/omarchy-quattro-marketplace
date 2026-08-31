@@ -2,6 +2,9 @@
 import Base from '../layouts/Base.astro';
 import ThemeCard from '../components/ThemeCard.astro';
 import EmptyState from '../components/EmptyState.astro';
+import SearchInput from '../components/SearchInput.astro';
+import FilterBar from '../components/FilterBar.astro';
+import FilterCount from '../components/FilterCount.astro';
 import type { ThemeRegistry } from '../data/theme-schema';
 
 const registry: ThemeRegistry = await import('../../registry.json').then(
@@ -21,14 +24,23 @@ const registry: ThemeRegistry = await import('../../registry.json').then(
       </p>
     </header>
 
+    {/* Search and Filters */}
+    <div class="space-y-6 rounded-lg border border-border bg-surface p-6">
+      <SearchInput totalCount={registry.length} />
+      <FilterBar registry={registry} />
+      <FilterCount totalCount={registry.length} />
+    </div>
+
+    {/* Theme Grid */}
     {registry.length > 0 ? (
       <div
         class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
         role="list"
         aria-label="Available themes"
+        data-theme-grid
       >
         {registry.map((theme) => (
-          <div role="listitem">
+          <div role="listitem" data-theme-item>
             <ThemeCard theme={theme} />
           </div>
         ))}
@@ -40,5 +52,120 @@ const registry: ThemeRegistry = await import('../../registry.json').then(
         icon="🎨"
       />
     )}
+
+    {/* Empty state for no search results (hidden by default) */}
+    <div
+      id="no-results"
+      class="hidden"
+    >
+      <EmptyState
+        title="No themes match your filters"
+        description="Try adjusting your search or filter criteria."
+        icon="🔍"
+      />
+    </div>
   </section>
 </Base>
+
+<script>
+  function initFiltering() {
+    const grid = document.querySelector('[data-theme-grid]');
+    const noResults = document.getElementById('no-results');
+    if (!grid || !noResults) return;
+
+    const items = grid.querySelectorAll('[data-theme-item]');
+    const cards = grid.querySelectorAll('[data-theme-card]');
+
+    // Current filter state
+    let currentFilters = {
+      search: '',
+      mood: [] as string[],
+      colorFamily: [] as string[],
+      tags: [] as string[],
+    };
+
+    document.addEventListener('filter-change', ((e: CustomEvent) => {
+      // Merge the event detail into current filters
+      if ('search' in e.detail) {
+        currentFilters.search = e.detail.search;
+      }
+      if ('mood' in e.detail) {
+        currentFilters.mood = e.detail.mood;
+      }
+      if ('colorFamily' in e.detail) {
+        currentFilters.colorFamily = e.detail.colorFamily;
+      }
+      if ('tags' in e.detail) {
+        currentFilters.tags = e.detail.tags;
+      }
+
+      applyFilters();
+    }) as EventListener);
+
+    function applyFilters() {
+      let visibleCount = 0;
+
+      cards.forEach((card, index) => {
+        const el = card as HTMLElement;
+        const name = el.dataset.themeName ?? '';
+        const author = el.dataset.themeAuthor ?? '';
+        const mood = (el.dataset.themeMood ?? '').split(',').filter(Boolean);
+        const color = el.dataset.themeColor ?? '';
+        const tags = (el.dataset.themeTags ?? '').split(',').filter(Boolean);
+
+        let visible = true;
+
+        // Search filter (matches name, author, or tags)
+        if (currentFilters.search) {
+          const query = currentFilters.search.toLowerCase();
+          const matchesName = name.includes(query);
+          const matchesAuthor = author.includes(query);
+          const matchesTags = tags.some((t) => t.includes(query));
+          if (!matchesName && !matchesAuthor && !matchesTags) {
+            visible = false;
+          }
+        }
+
+        // Mood filter (OR logic — theme must have at least one selected mood)
+        if (visible && currentFilters.mood.length > 0) {
+          if (!currentFilters.mood.some((m) => mood.includes(m))) {
+            visible = false;
+          }
+        }
+
+        // Color family filter (OR logic)
+        if (visible && currentFilters.colorFamily.length > 0) {
+          if (!currentFilters.colorFamily.includes(color)) {
+            visible = false;
+          }
+        }
+
+        // Tags filter (OR logic — theme must have at least one selected tag)
+        if (visible && currentFilters.tags.length > 0) {
+          if (!currentFilters.tags.some((t) => tags.includes(t))) {
+            visible = false;
+          }
+        }
+
+        // Apply visibility
+        const item = items[index] as HTMLElement;
+        if (visible) {
+          item.hidden = false;
+          el.removeAttribute('hidden');
+          visibleCount++;
+        } else {
+          item.hidden = true;
+          el.setAttribute('hidden', '');
+        }
+      });
+
+      // Show/hide grid and no-results state
+      const hasResults = visibleCount > 0;
+      grid.classList.toggle('hidden', !hasResults);
+      noResults.classList.toggle('hidden', hasResults);
+    }
+  }
+
+  initFiltering();
+  document.addEventListener('astro:page-load', initFiltering);
+</script>
