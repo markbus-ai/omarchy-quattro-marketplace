@@ -3,7 +3,7 @@
  * PaletteGrid.astro — Renders a 24-color palette as a grid of accessible swatches.
  *
  * Each swatch is focusable (tabindex="0"), has an aria-label with the color name
- * and hex value, and shows a tooltip on hover.
+ * and hex value, and shows a tooltip on hover/focus.
  */
 
 import { PALETTE_KEYS, type Palette } from '../data/theme-schema';
@@ -12,9 +12,12 @@ interface Props {
   palette: Palette;
   /** Size variant: "sm" for cards, "lg" for detail pages */
   size?: 'sm' | 'lg';
+  /** Unique ID to namespace event handlers */
+  id?: string;
 }
 
-const { palette, size = 'sm' } = Astro.props;
+const { palette, size = 'sm', id } = Astro.props;
+const gridId = id ?? `palette-${Math.random().toString(36).slice(2, 8)}`;
 
 /** Human-readable labels for each palette key. */
 const LABELS: Record<string, string> = {
@@ -61,10 +64,10 @@ function textColor(hex: string): string {
 }
 
 const swatchSize = size === 'lg' ? 'w-12 h-12' : 'w-7 h-7';
-const textSize = size === 'lg' ? 'text-xs' : 'text-[0.625rem]';
 ---
 
 <ul
+  id={gridId}
   class="grid gap-1.5"
   class:list={size === 'lg' ? 'grid-cols-6 sm:grid-cols-8' : 'grid-cols-6'}
   aria-label="Color palette"
@@ -75,10 +78,7 @@ const textSize = size === 'lg' ? 'text-xs' : 'text-[0.625rem]';
     const fg = textColor(hex);
 
     return (
-      <li
-        class="group/swatch relative"
-        title={`${label}: ${hex}`}
-      >
+      <li class="relative">
         <span
           class:list={[
             swatchSize,
@@ -86,21 +86,68 @@ const textSize = size === 'lg' ? 'text-xs' : 'text-[0.625rem]';
             'hover:scale-125 hover:z-10',
           ]}
           style={`background-color: ${hex}; color: ${fg};`}
+          data-swatch-tooltip={`${label}: ${hex}`}
         >
           {size === 'lg' && (
             <span class="sr-only">{label}</span>
           )}
         </span>
-
-        {/* Tooltip — uses named group to avoid conflict with ThemeCard's group */}
-        <div
-          class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-surface px-2 py-1 text-xs text-foreground shadow-lg opacity-0 transition-opacity group-hover/swatch:opacity-100 group-focus-within/swatch:opacity-100"
-          role="tooltip"
-        >
-          <span class="font-medium">{label}</span>
-          <span class="ml-1 font-mono text-muted-foreground">{hex}</span>
-        </div>
       </li>
     );
   })}
 </ul>
+
+<script>
+  function initPaletteGrids() {
+    document.querySelectorAll<HTMLElement>('[id^="palette-"]').forEach((grid) => {
+      let tooltip: HTMLDivElement | null = null;
+
+      function hide() {
+        if (tooltip) {
+          tooltip.remove();
+          tooltip = null;
+        }
+      }
+
+      function show(swatch: HTMLElement) {
+        hide();
+        const text = swatch.dataset.swatchTooltip;
+        if (!text) return;
+
+        tooltip = document.createElement('div');
+        tooltip.textContent = text;
+        tooltip.className =
+          'pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-surface px-2 py-1 text-xs text-foreground shadow-lg border border-border';
+        tooltip.setAttribute('role', 'tooltip');
+
+        const li = swatch.closest('li')!;
+        li.appendChild(tooltip);
+      }
+
+      grid.addEventListener('mouseover', (e) => {
+        const swatch = (e.target as HTMLElement).closest('[data-swatch-tooltip]');
+        if (swatch) show(swatch as HTMLElement);
+      });
+
+      grid.addEventListener('mouseout', (e) => {
+        const swatch = (e.target as HTMLElement).closest('[data-swatch-tooltip]');
+        if (swatch) {
+          const related = e.relatedTarget as HTMLElement | null;
+          if (!related || !related.closest || !related.closest('[data-swatch-tooltip]')) {
+            hide();
+          }
+        }
+      });
+
+      grid.addEventListener('focusin', (e) => {
+        const swatch = (e.target as HTMLElement).closest('[data-swatch-tooltip]');
+        if (swatch) show(swatch as HTMLElement);
+      });
+
+      grid.addEventListener('focusout', () => hide());
+    });
+  }
+
+  initPaletteGrids();
+  document.addEventListener('astro:page-load', initPaletteGrids);
+</script>
