@@ -76,7 +76,7 @@ const textSize = size === 'lg' ? 'text-xs' : 'text-[0.625rem]';
 
     return (
       <li
-        class="group relative"
+        class="group/swatch relative"
         title={`${label}: ${hex}`}
       >
         <span
@@ -92,9 +92,9 @@ const textSize = size === 'lg' ? 'text-xs' : 'text-[0.625rem]';
           )}
         </span>
 
-        {/* Tooltip */}
+        {/* Tooltip — uses named group to avoid conflict with ThemeCard's group */}
         <div
-          class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-surface px-2 py-1 text-xs text-foreground shadow-lg opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
+          class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-surface px-2 py-1 text-xs text-foreground shadow-lg opacity-0 transition-opacity group-hover/swatch:opacity-100 group-focus-within/swatch:opacity-100"
           role="tooltip"
         >
           <span class="font-medium">{label}</span>
