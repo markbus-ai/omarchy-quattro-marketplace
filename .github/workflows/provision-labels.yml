@@ -1,0 +1,45 @@
+name: Provision Labels
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/workflows/provision-labels.yml'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  provision-labels:
+    name: Ensure submission labels exist
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create labels
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LABELS=(
+            "submission:#0075ca"
+            "validated:#0e8a16"
+            "needs-fixes:#d93f0b"
+            "approved-and-verified:#5319e7"
+            "listed:#1a7f37"
+            "update-pending:#fbca04"
+          )
+
+          for entry in "${LABELS[@]}"; do
+            NAME="${entry%%:*}"
+            COLOR="${entry##*:}"
+            echo "Ensuring label: $NAME ($COLOR)"
+
+            # gh label create is idempotent — it fails if label exists,
+            # which is fine. We ignore that error.
+            gh label create "$NAME" \
+              --color "$COLOR" \
+              --description "Submission workflow label" \
+              --force 2>/dev/null || true
+          done
+
+          echo "✅ All labels provisioned."

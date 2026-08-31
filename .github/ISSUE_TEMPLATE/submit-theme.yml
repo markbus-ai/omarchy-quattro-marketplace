@@ -1,0 +1,81 @@
+name: Submit a Theme
+description: Propose a public Omarchy 4 theme repository for the marketplace.
+labels: ["submission"]
+body:
+  - type: input
+    id: repository
+    attributes:
+      label: Repository URL
+      description: Public GitHub repository containing the Quattro theme.
+      placeholder: https://github.com/yourname/omarchy-theme-name
+    validations:
+      required: true
+  - type: dropdown
+    id: mood
+    attributes:
+      label: Theme Mood
+      description: Select the primary mood of your theme.
+      options:
+        - Dark
+        - Light
+        - Colorful
+        - Muted
+        - Warm
+        - Cool
+    validations:
+      required: true
+  - type: dropdown
+    id: color-family
+    attributes:
+      label: Color Family
+      description: Select the dominant color family.
+      options:
+        - Blue
+        - Green
+        - Red
+        - Purple
+        - Orange
+        - Yellow
+        - Pink
+        - Gray
+        - Multi
+    validations:
+      required: true
+  - type: input
+    id: tags
+    attributes:
+      label: Tags
+      description: "Comma-separated tags (e.g., minimal, neon, pastel, retro). Max 3."
+      placeholder: "minimal, pastel"
+    validations:
+      required: false
+  - type: textarea
+    id: description
+    attributes:
+      label: Theme Description
+      description: Brief description of your theme's aesthetic and intended use.
+      placeholder: "A calm, low-contrast theme for late-night coding sessions."
+    validations:
+      required: true
+  - type: textarea
+    id: maintainer-notes
+    attributes:
+      label: Maintainer Notes
+      description: Anything reviewers should know about the theme, dependencies, or special setup.
+    validations:
+      required: false
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Submission Checklist
+      options:
+        - label: The repository is public and contains a valid `theme.yaml` and `colors.toml`.
+          required: true
+        - label: The `colors.toml` contains all 24 Omarchy 4 palette keys.
+          required: true
+        - label: I have documented the theme license.
+          required: true
+        - label: I confirm that I own or have permission to submit this theme and its preview assets.
+          required: true
+        - label: I understand that approval is for listing and is not a security review.
+          required: true
