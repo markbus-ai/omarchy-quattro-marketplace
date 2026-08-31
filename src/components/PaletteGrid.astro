@@ -68,8 +68,10 @@ const swatchSize = size === 'lg' ? 'w-12 h-12' : 'w-7 h-7';
 
 <ul
   id={gridId}
-  class="grid gap-1.5"
-  class:list={size === 'lg' ? 'grid-cols-6 sm:grid-cols-8' : 'grid-cols-6'}
+  class:list={[
+    'grid gap-1.5',
+    size === 'lg' ? 'grid-cols-6 sm:grid-cols-8' : 'grid-cols-6',
+  ]}
   aria-label="Color palette"
 >
   {PALETTE_KEYS.map((key) => {
