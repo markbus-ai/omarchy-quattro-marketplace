@@ -490,5 +490,56 @@
       "accent": "#6b8666",
       "comment": "#5a5d63"
     }
+  },
+  {
+    "name": "Violet",
+    "slug": "violet",
+    "author": "Aether",
+    "version": "1.0.0",
+    "description": "Deep violet and lavender tones with soft pink and cyan accents",
+    "mood": [
+      "dark",
+      "cool"
+    ],
+    "color_family": "purple",
+    "tags": [
+      "purple",
+      "violet",
+      "lavender",
+      "cool"
+    ],
+    "hyprland_version": "4.x",
+    "license": "CC-BY-4.0",
+    "preview": "wallpaper.jpg",
+    "source": {
+      "type": "aether-generated",
+      "wallpaper": "wallhaven.cc"
+    },
+    "palette": {
+      "background": "#0b011b",
+      "foreground": "#ffb6ff",
+      "cursor": "#ffb6ff",
+      "selection_foreground": "#0b011b",
+      "selection_background": "#ffb6ff",
+      "border": "#1a1a1f",
+      "color0": "#0b011b",
+      "color1": "#aa81b7",
+      "color2": "#8ec3ff",
+      "color3": "#ffccff",
+      "color4": "#7974b6",
+      "color5": "#b796e8",
+      "color6": "#b0d3ff",
+      "color7": "#ffb6ff",
+      "color8": "#5e5c62",
+      "color9": "#c592d5",
+      "color10": "#94daff",
+      "color11": "#ffc6ff",
+      "color12": "#8d86d8",
+      "color13": "#d1a6ff",
+      "color14": "#bee8ff",
+      "color15": "#f5f3ff",
+      "accent": "#7974b6",
+      "comment": "#6c7086"
+    }
   }
 ]

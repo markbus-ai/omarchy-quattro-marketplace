@@ -1,0 +1,15 @@
+name: "Violet"
+slug: "violet"
+author: "Aether"
+version: "1.0.0"
+description: "Deep violet and lavender tones with soft pink and cyan accents"
+mood: ["dark", "cool"]
+color_family: "purple"
+tags: ["purple", "violet", "lavender", "cool"]
+hyprland_version: "4.x"
+license: "CC-BY-4.0"
+preview: "wallpaper.jpg"
+
+source:
+  type: "aether-generated"
+  wallpaper: "wallhaven.cc"
