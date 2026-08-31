@@ -1,0 +1,15 @@
+name: "Ocean"
+slug: "ocean"
+author: "Aether"
+version: "1.0.0"
+description: "Deep sea blues with coral reef accents"
+mood: ["dark", "cool"]
+color_family: "blue"
+tags: [ocean,sea,blue]
+hyprland_version: "4.x"
+license: "CC-BY-4.0"
+preview: "wallpaper.jpg"
+
+source:
+  type: "aether-generated"
+  wallpaper: "wallhaven.cc"

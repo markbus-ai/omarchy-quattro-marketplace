@@ -1,0 +1,15 @@
+name: "Sakura"
+slug: "sakura"
+author: "Aether"
+version: "1.0.0"
+description: "Cherry blossom pink with soft pastel tones"
+mood: ["dark", "pastel"]
+color_family: "pink"
+tags: [cherry,sakura,pink]
+hyprland_version: "4.x"
+license: "CC-BY-4.0"
+preview: "wallpaper.jpg"
+
+source:
+  type: "aether-generated"
+  wallpaper: "wallhaven.cc"

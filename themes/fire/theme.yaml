@@ -1,0 +1,15 @@
+name: "Fire"
+slug: "fire"
+author: "Aether"
+version: "1.0.0"
+description: "Flame gradient with intense reds and oranges"
+mood: ["dark", "warm"]
+color_family: "red"
+tags: [fire,flame,hot]
+hyprland_version: "4.x"
+license: "CC-BY-4.0"
+preview: "wallpaper.jpg"
+
+source:
+  type: "aether-generated"
+  wallpaper: "wallhaven.cc"

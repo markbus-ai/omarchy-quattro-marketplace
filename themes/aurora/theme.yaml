@@ -1,0 +1,15 @@
+name: "Aurora"
+slug: "aurora"
+author: "Aether"
+version: "1.0.0"
+description: "Vibrant sunset gradient with warm oranges and cool blues"
+mood: ["dark", "warm"]
+color_family: "orange"
+tags: [gradient,warm,sunset]
+hyprland_version: "4.x"
+license: "CC-BY-4.0"
+preview: "wallpaper.jpg"
+
+source:
+  type: "aether-generated"
+  wallpaper: "wallhaven.cc"

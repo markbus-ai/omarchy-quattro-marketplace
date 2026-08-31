@@ -1,0 +1,15 @@
+name: "Tropical"
+slug: "tropical"
+author: "Aether"
+version: "1.0.0"
+description: "Island vibes with vibrant greens and teals"
+mood: ["dark", "neon"]
+color_family: "green"
+tags: [tropical,island,neon]
+hyprland_version: "4.x"
+license: "CC-BY-4.0"
+preview: "wallpaper.jpg"
+
+source:
+  type: "aether-generated"
+  wallpaper: "wallhaven.cc"
