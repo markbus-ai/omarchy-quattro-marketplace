@@ -120,13 +120,21 @@ const { theme } = Astro.props;
         {/* Install */}
         <div class="rounded-lg border border-border bg-background p-4">
           <h2 class="text-sm font-medium text-muted-foreground mb-2">Install</h2>
-          <div class="flex items-center gap-2">
-            <code class="flex-1 rounded bg-surface px-3 py-2 text-xs text-foreground font-mono overflow-x-auto">
-              git clone --depth 1 --filter=blob:none --sparse https://github.com/markbus-ai/omarchy-quattro-marketplace.git /tmp/omarchy-marketplace &amp;&amp; cd /tmp/omarchy-marketplace &amp;&amp; git sparse-checkout set themes/{theme.slug} &amp;&amp; cp -r themes/{theme.slug} ~/.config/omarchy/themes/ &amp;&amp; cd ~ &amp;&amp; rm -rf /tmp/omarchy-marketplace
-            </code>
+          <div class="flex items-center gap-2 rounded bg-surface px-3 py-2 font-mono text-sm text-foreground border border-border">
+            <code class="flex-1 overflow-x-auto">omarchy-install-theme {theme.slug}</code>
             <button
-              class="shrink-0 rounded-md border border-border bg-background px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:border-accent/50 hover:text-accent"
-              onclick={`navigator.clipboard.writeText('git clone --depth 1 --filter=blob:none --sparse https://github.com/markbus-ai/omarchy-quattro-marketplace.git /tmp/omarchy-marketplace && cd /tmp/omarchy-marketplace && git sparse-checkout set themes/${theme.slug} && cp -r themes/${theme.slug} ~/.config/omarchy/themes/ && cd ~ && rm -rf /tmp/omarchy-marketplace && echo "✔ Installed! Run: omarchy theme set ${theme.slug}"'); this.textContent='✔ Copied!'; setTimeout(()=>this.textContent='Copy',1500)`}
+              type="button"
+              class="shrink-0 rounded p-1 text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              aria-label="Copy install command"
+              onclick={`navigator.clipboard.writeText('omarchy-install-theme ${theme.slug}'); this.textContent='✔'; setTimeout(()=>this.textContent='📋',1500)`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+              </svg>
+            </button>
+          </div>
+        </div>
             >
               Copy
             </button>
