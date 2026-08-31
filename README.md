@@ -158,7 +158,7 @@ See [SECURITY.md](SECURITY.md) for full details.
 
 ## Credits
 
-- [Omarchy](https://omarchy.org) by Dizziee
+- [Omarchy](https://omarchy.org) by [DHH](https://dhh.dk)
 - [Aether](https://github.com/bjarneo/aether) theme generator
 - Inspired by [HANCORE Plugin Marketplace](https://github.com/HANCORE-linux/omarchy-plugin-marketplace)
 
