@@ -1,0 +1,49 @@
+@define-color bg #06080C;
+@define-color fg #D2A7B4;
+@define-color gray1 #aec5e5;
+@define-color gray2 #5c5f64;
+@define-color gray3 #7f7c9b;
+@define-color gray4 #ffe2fe;
+@define-color gray5 #b4a4ca;
+@define-color fg_bright #f6f3fe;
+
+window {
+    background-color: @bg;
+    border: 2px solid @gray3;
+}
+
+input {
+    background-color: @bg;
+    color: @fg;
+    border: 1px solid @gray2;
+}
+
+input:selected {
+    background-color: @gray1;
+    color: @fg_bright;
+}
+
+#entry {
+    color: @fg;
+    background-color: @bg;
+    padding: 5px;
+    margin: 2px;
+}
+
+#entry:selected {
+    background-color: @gray1;
+    color: @fg_bright;
+}
+
+scrollbar {
+    background-color: @bg;
+}
+
+scrollbar slider {
+    background-color: @gray2;
+    border-radius: 5px;
+}
+
+scrollbar slider:hover {
+    background-color: @gray3;
+}

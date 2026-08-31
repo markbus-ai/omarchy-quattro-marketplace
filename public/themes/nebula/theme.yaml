@@ -1,0 +1,14 @@
+name: "Nebula"
+slug: "nebula"
+author: "Aether x Marketplace"
+version: "1.0.0"
+description: "Dark purple galaxy with cosmic tones"
+mood: ["dark"]
+color_family: "neutral"
+tags: ["dark", "aether-generated"]
+hyprland_version: "4.x"
+license: "CC-BY-4.0"
+preview: "preview.png"
+source:
+  type: "aether-generated"
+  wallpaper: "wallhaven.cc"

@@ -59,15 +59,6 @@ const { theme } = Astro.props;
 
       {/* Palette grid */}
       <PaletteGrid palette={theme.palette} size="sm" />
-
-      {/* Install button */}
-      <button
-        class="install-btn w-full rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-accent/50 hover:text-accent"
-        data-install={theme.slug}
-        onclick={`navigator.clipboard.writeText('mkdir -p ~/.config/omarchy/themes/${theme.slug} && curl -sL https://raw.githubusercontent.com/markbus-ai/omarchy-quattro-marketplace/main/themes/${theme.slug}/colors.toml -o ~/.config/omarchy/themes/${theme.slug}/colors.toml && curl -sL https://raw.githubusercontent.com/markbus-ai/omarchy-quattro-marketplace/main/themes/${theme.slug}/theme.yaml -o ~/.config/omarchy/themes/${theme.slug}/theme.yaml && curl -sL https://raw.githubusercontent.com/markbus-ai/omarchy-quattro-marketplace/main/themes/${theme.slug}/preview.png -o ~/.config/omarchy/themes/${theme.slug}/preview.png && echo "✔ Installed! Run: omarchy theme set ${theme.slug}"'); this.textContent='✔ Copied!'; setTimeout(()=>this.textContent='Install',1500)`}
-      >
-        Install
-      </button>
     </div>
   </a>
 </article>
