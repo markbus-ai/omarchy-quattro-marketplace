@@ -20,7 +20,7 @@
  * Exit 0 on success, exit 1 on error.
  */
 
-import { appendFileSync, readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
+import { appendFileSync, readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, cpSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { execSync } from "node:child_process";
 import { parse as parseYaml } from "yaml";
@@ -161,20 +161,16 @@ function main() {
   const headSha = getHeadSha(tmpDir);
   process.stdout.write(`HEAD commit: ${headSha}\n`);
 
-  // 5. Copy files into themes/<slug>/
+  // 5. Copy ALL theme files into themes/<slug>/ (not just 3 files)
   mkdirSync(targetDir, { recursive: true });
 
-  const filesToCopy = ["theme.yaml", "colors.toml", "preview.png"];
-  for (const file of filesToCopy) {
-    const src = join(tmpDir, file);
-    const dest = join(targetDir, file);
-    try {
-      const content = readFileSync(src);
-      writeFileSync(dest, content);
-    } catch {
-      process.stderr.write(`Error: Required file "${file}" not found in submitted repo.\n`);
-      process.exit(1);
-    }
+  // Copy everything from the cloned repo except .git
+  const items = readdirSync(tmpDir);
+  for (const item of items) {
+    if (item === ".git") continue;
+    const src = join(tmpDir, item);
+    const dest = join(targetDir, item);
+    cpSync(src, dest, { recursive: true });
   }
 
   // 6. Add source metadata to theme.yaml
