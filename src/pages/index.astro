@@ -28,7 +28,7 @@ const registry: ThemeRegistry = await import('../../registry.json').then(
     {/* Search and Filters — collapsed by default on mobile */}
     <div class="rounded-xl border border-border/50 bg-surface/50 p-4 sm:p-6">
       <SearchInput totalCount={registry.length} />
-      <div class="mt-4">
+      <div class="mt-3">
         <FilterBar registry={registry} />
       </div>
       <FilterCount totalCount={registry.length} />

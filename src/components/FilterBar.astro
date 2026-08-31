@@ -3,6 +3,7 @@
  * FilterBar.astro — Mood, color_family, and tags filter toggles.
  *
  * Features:
+ * - Collapsible filter sections
  * - aria-pressed toggle buttons for each filter value
  * - "Clear all" button to reset all filters
  * - Dispatches "filter-change" CustomEvent on the document
@@ -21,68 +22,85 @@ const { registry } = Astro.props;
 const allTags = [...new Set(registry.flatMap((theme) => theme.tags))].sort();
 ---
 
-<div class="space-y-4" data-filter-bar>
-  {/* Mood filters */}
-  <fieldset>
-    <legend class="text-sm font-medium text-foreground mb-2">Mood</legend>
-    <div class="flex flex-wrap gap-2" data-filter-group="mood">
-      {MOOD_VALUES.map((mood) => (
-        <button
-          type="button"
-          aria-pressed="false"
-          data-filter-value={mood}
-          class="inline-flex items-center rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-accent/50 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background data-[pressed=true]:border-accent data-[pressed=true]:bg-accent/10 data-[pressed=true]:text-accent"
-        >
-          {mood}
-        </button>
-      ))}
-    </div>
-  </fieldset>
+<div class="space-y-3" data-filter-bar>
+  {/* Filter toggle button */}
+  <button
+    type="button"
+    data-filter-toggle
+    class="flex items-center gap-2 text-sm font-medium text-foreground hover:text-accent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+    aria-expanded="false"
+    aria-controls="filter-content"
+  >
+    <svg class="h-4 w-4 transition-transform duration-200" data-filter-chevron viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+    </svg>
+    <span>Filters</span>
+  </button>
 
-  {/* Color family filters */}
-  <fieldset>
-    <legend class="text-sm font-medium text-foreground mb-2">Color</legend>
-    <div class="flex flex-wrap gap-2" data-filter-group="color_family">
-      {COLOR_FAMILY_VALUES.map((color) => (
-        <button
-          type="button"
-          aria-pressed="false"
-          data-filter-value={color}
-          class="inline-flex items-center rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-accent/50 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background data-[pressed=true]:border-accent data-[pressed=true]:bg-accent/10 data-[pressed=true]:text-accent"
-        >
-          {color}
-        </button>
-      ))}
-    </div>
-  </fieldset>
-
-  {/* Tags filters */}
-  {allTags.length > 0 && (
+  {/* Filter content — collapsible */}
+  <div id="filter-content" class="hidden space-y-4" data-filter-content>
+    {/* Mood filters */}
     <fieldset>
-      <legend class="text-sm font-medium text-foreground mb-2">Tags</legend>
-      <div class="flex flex-wrap gap-2" data-filter-group="tags">
-        {allTags.map((tag) => (
+      <legend class="text-sm font-medium text-foreground mb-2">Mood</legend>
+      <div class="flex flex-wrap gap-2" data-filter-group="mood">
+        {MOOD_VALUES.map((mood) => (
           <button
             type="button"
             aria-pressed="false"
-            data-filter-value={tag}
+            data-filter-value={mood}
             class="inline-flex items-center rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-accent/50 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background data-[pressed=true]:border-accent data-[pressed=true]:bg-accent/10 data-[pressed=true]:text-accent"
           >
-            {tag}
+            {mood}
           </button>
         ))}
       </div>
     </fieldset>
-  )}
 
-  {/* Clear all button */}
-  <button
-    type="button"
-    data-clear-filters
-    class="hidden text-sm text-accent hover:text-accent/80 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-  >
-    Clear all filters
-  </button>
+    {/* Color family filters */}
+    <fieldset>
+      <legend class="text-sm font-medium text-foreground mb-2">Color</legend>
+      <div class="flex flex-wrap gap-2" data-filter-group="color_family">
+        {COLOR_FAMILY_VALUES.map((color) => (
+          <button
+            type="button"
+            aria-pressed="false"
+            data-filter-value={color}
+            class="inline-flex items-center rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-accent/50 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background data-[pressed=true]:border-accent data-[pressed=true]:bg-accent/10 data-[pressed=true]:text-accent"
+          >
+            {color}
+          </button>
+        ))}
+      </div>
+    </fieldset>
+
+    {/* Tags filters */}
+    {allTags.length > 0 && (
+      <fieldset>
+        <legend class="text-sm font-medium text-foreground mb-2">Tags</legend>
+        <div class="flex flex-wrap gap-2" data-filter-group="tags">
+          {allTags.map((tag) => (
+            <button
+              type="button"
+              aria-pressed="false"
+              data-filter-value={tag}
+              class="inline-flex items-center rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-accent/50 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background data-[pressed=true]:border-accent data-[pressed=true]:bg-accent/10 data-[pressed=true]:text-accent"
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+      </fieldset>
+    )}
+
+    {/* Clear all button */}
+    <button
+      type="button"
+      data-clear-filters
+      class="hidden text-sm text-accent hover:text-accent/80 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+    >
+      Clear all filters
+    </button>
+  </div>
 </div>
 
 <script>
@@ -90,8 +108,19 @@ const allTags = [...new Set(registry.flatMap((theme) => theme.tags))].sort();
     const filterBar = document.querySelector('[data-filter-bar]');
     if (!filterBar) return;
 
+    const toggleButton = filterBar.querySelector('[data-filter-toggle]') as HTMLButtonElement;
+    const filterContent = filterBar.querySelector('[data-filter-content]') as HTMLElement;
+    const chevron = filterBar.querySelector('[data-filter-chevron]') as SVGElement;
     const toggleButtons = filterBar.querySelectorAll('button[data-filter-value]');
     const clearButton = filterBar.querySelector('[data-clear-filters]') as HTMLButtonElement;
+
+    // Handle filter toggle
+    toggleButton?.addEventListener('click', () => {
+      const isExpanded = toggleButton.getAttribute('aria-expanded') === 'true';
+      toggleButton.setAttribute('aria-expanded', String(!isExpanded));
+      filterContent?.classList.toggle('hidden');
+      chevron?.style.setProperty('transform', isExpanded ? '' : 'rotate(90deg)');
+    });
 
     // Handle toggle clicks
     toggleButtons.forEach((button) => {
