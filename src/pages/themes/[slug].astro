@@ -1,0 +1,158 @@
+---
+/**
+ * [slug].astro — Dynamic route for individual theme detail pages.
+ *
+ * Shows full theme info: larger palette grid, description, install command,
+ * author, version, license, and tags.
+ */
+
+import Base from '../../layouts/Base.astro';
+import PaletteGrid from '../../components/PaletteGrid.astro';
+import type { ThemeRegistry } from '../../data/theme-schema';
+
+export async function getStaticPaths() {
+  const registry: ThemeRegistry = await import('../../../registry.json').then(
+    (m) => m.default,
+  );
+
+  return registry.map((theme) => ({
+    params: { slug: theme.slug },
+    props: { theme },
+  }));
+}
+
+const { theme } = Astro.props;
+
+const installCommand = `omarchy-install-theme ${theme.slug}`;
+---
+
+<Base title={`${theme.name} — Omarchy Quattro Marketplace`} description={theme.description}>
+  <article class="space-y-8" aria-labelledby="theme-title">
+    {/* Back link */}
+    <a
+      href="/"
+      class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+    >
+      <span aria-hidden="true">&larr;</span>
+      All Themes
+    </a>
+
+    {/* Header */}
+    <header class="space-y-4">
+      <div class="flex flex-wrap items-baseline gap-3">
+        <h1 id="theme-title" class="text-3xl font-bold tracking-tight text-foreground">
+          {theme.name}
+        </h1>
+        <span class="text-sm text-muted-foreground">v{theme.version}</span>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+        <span>by <strong class="font-medium text-foreground">{theme.author}</strong></span>
+        <span aria-hidden="true">·</span>
+        <span>{theme.license}</span>
+        <span aria-hidden="true">·</span>
+        <span>Hyprland {theme.hyprland_version}</span>
+      </div>
+    </header>
+
+    <div class="grid gap-8 lg:grid-cols-[1fr_320px]">
+      {/* Main content */}
+      <div class="space-y-8">
+        {/* Preview image */}
+        <div class="overflow-hidden rounded-lg border border-border">
+          <img
+            src={`/themes/${theme.slug}/${theme.preview}`}
+            alt={`Preview of ${theme.name} theme`}
+            class="w-full object-cover"
+            width="960"
+            height="600"
+          />
+        </div>
+
+        {/* Description */}
+        <section aria-labelledby="description-heading">
+          <h2 id="description-heading" class="text-lg font-semibold text-foreground mb-3">
+            About this theme
+          </h2>
+          <p class="text-muted-foreground leading-relaxed">{theme.description}</p>
+        </section>
+
+        {/* Tags */}
+        <section aria-labelledby="tags-heading">
+          <h2 id="tags-heading" class="text-lg font-semibold text-foreground mb-3">
+            Tags
+          </h2>
+          <div class="flex flex-wrap gap-2">
+            {theme.tags.map((tag) => (
+              <span class="inline-flex items-center rounded-full bg-background px-3 py-1 text-sm font-medium text-muted-foreground border border-border">
+                {tag}
+              </span>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      {/* Sidebar */}
+      <aside class="space-y-6">
+        {/* Install command */}
+        <div class="rounded-lg border border-border bg-background p-4">
+          <h2 class="text-sm font-medium text-muted-foreground mb-2">Install</h2>
+          <div class="flex items-center gap-2 rounded bg-surface px-3 py-2 font-mono text-sm text-foreground border border-border">
+            <code class="flex-1 overflow-x-auto">{installCommand}</code>
+            <button
+              type="button"
+              class="shrink-0 rounded p-1 text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              aria-label="Copy install command"
+              data-copy={installCommand}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Palette */}
+        <div class="rounded-lg border border-border bg-background p-4">
+          <h2 class="text-sm font-medium text-muted-foreground mb-3">24-Color Palette</h2>
+          <PaletteGrid palette={theme.palette} size="lg" />
+        </div>
+
+        {/* Metadata */}
+        <div class="rounded-lg border border-border bg-background p-4 space-y-3 text-sm">
+          <h2 class="font-medium text-muted-foreground">Details</h2>
+          <dl class="space-y-2">
+            <div class="flex justify-between">
+              <dt class="text-muted-foreground">Color family</dt>
+              <dd class="font-medium text-foreground capitalize">{theme.color_family}</dd>
+            </div>
+            <div class="flex justify-between">
+              <dt class="text-muted-foreground">Mood</dt>
+              <dd class="font-medium text-foreground capitalize">{theme.mood.join(', ')}</dd>
+            </div>
+            <div class="flex justify-between">
+              <dt class="text-muted-foreground">License</dt>
+              <dd class="font-medium text-foreground">{theme.license}</dd>
+            </div>
+          </dl>
+        </div>
+      </aside>
+    </div>
+  </article>
+
+  <script>
+    // Copy-to-clipboard for install command
+    document.querySelectorAll('[data-copy]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const text = btn.getAttribute('data-copy');
+        if (text) {
+          await navigator.clipboard.writeText(text);
+          const originalLabel = btn.getAttribute('aria-label');
+          btn.setAttribute('aria-label', 'Copied!');
+          setTimeout(() => btn.setAttribute('aria-label', originalLabel ?? ''), 2000);
+        }
+      });
+    });
+  </script>
+</Base>
