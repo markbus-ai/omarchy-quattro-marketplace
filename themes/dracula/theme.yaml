@@ -1,18 +1,14 @@
-name: Dracula
-slug: dracula
-author: Dracula Theme
-version: 1.0.0
+name: "Dracula"
+slug: "dracula"
+author: "Dracula Theme"
+version: "1.0.0"
 description: "A dark palette for those who desire a dark theme with vibrant, spooky colors."
-mood:
-  - dark
-  - cool
-  - neon
-color_family: purple
-tags:
-  - dark
-  - popular
-  - vibrant
-  - purple
+mood: ["dark"]
+color_family: "blue"
+tags: ["dark", "aether-generated"]
 hyprland_version: "4.x"
-license: MIT
-preview: preview.png
+license: "MIT"
+preview: "preview.png"
+source:
+  type: "aether-generated"
+  wallpaper: "wallhaven.cc"

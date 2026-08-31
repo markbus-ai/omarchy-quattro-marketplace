@@ -1,13 +1,13 @@
-name: "Gruvbox"
-slug: "gruvbox"
-author: "Gruvbox Community"
+name: "Nebula"
+slug: "nebula"
+author: "Aether x Marketplace"
 version: "1.0.0"
-description: "A retro-inspired warm color scheme with high contrast and earthy tones."
+description: "Dark purple galaxy with cosmic tones"
 mood: ["dark"]
 color_family: "neutral"
 tags: ["dark", "aether-generated"]
 hyprland_version: "4.x"
-license: "MIT"
+license: "CC-BY-4.0"
 preview: "preview.png"
 source:
   type: "aether-generated"

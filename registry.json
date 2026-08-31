@@ -1,25 +1,73 @@
 [
   {
+    "name": "Midnight Street",
+    "slug": "calle",
+    "author": "Aether x Marketplace",
+    "version": "1.0.0",
+    "description": "Monochrome urban night with streetlight",
+    "mood": [
+      "dark"
+    ],
+    "color_family": "neutral",
+    "tags": [
+      "dark",
+      "aether-generated"
+    ],
+    "hyprland_version": "4.x",
+    "license": "CC-BY-4.0",
+    "preview": "preview.png",
+    "source": {
+      "type": "aether-generated",
+      "wallpaper": "wallhaven.cc"
+    },
+    "palette": {
+      "background": "#000000",
+      "foreground": "#f4f4f4",
+      "cursor": "#f4f4f4",
+      "selection_foreground": "#000000",
+      "selection_background": "#f4f4f4",
+      "border": "#0f0f0f",
+      "color0": "#000000",
+      "color1": "#939393",
+      "color2": "#bfbfbf",
+      "color3": "#eeeeee",
+      "color4": "#7d7d7d",
+      "color5": "#a9a9a9",
+      "color6": "#d7d7d7",
+      "color7": "#f4f4f4",
+      "color8": "#686163",
+      "color9": "#a5a5a5",
+      "color10": "#d3d3d3",
+      "color11": "#f5f5f5",
+      "color12": "#8f8f8f",
+      "color13": "#bcbcbc",
+      "color14": "#eaeaea",
+      "color15": "#fcfcfc",
+      "accent": "#7d7d7d",
+      "comment": "#686163"
+    }
+  },
+  {
     "name": "Catppuccin Mocha",
     "slug": "catppuccin-mocha",
     "author": "Catppuccin",
     "version": "1.0.0",
     "description": "Soothing pastel theme for the high-spirited. The default dark flavor of Catppuccin.",
     "mood": [
-      "dark",
-      "cool",
-      "pastel"
+      "dark"
     ],
-    "color_family": "purple",
+    "color_family": "blue",
     "tags": [
-      "pastel",
       "dark",
-      "comfortable",
-      "popular"
+      "aether-generated"
     ],
     "hyprland_version": "4.x",
     "license": "MIT",
     "preview": "preview.png",
+    "source": {
+      "type": "aether-generated",
+      "wallpaper": "wallhaven.cc"
+    },
     "palette": {
       "background": "#1e1e2e",
       "foreground": "#cdd6f4",
@@ -44,7 +92,55 @@
       "color14": "#94e2d5",
       "color15": "#a6adc8",
       "accent": "#cba6f7",
-      "comment": "#6c7086"
+      "comment": "#585b70"
+    }
+  },
+  {
+    "name": "Obsidian",
+    "slug": "darktex",
+    "author": "Aether x Marketplace",
+    "version": "1.0.0",
+    "description": "Low light dark texture",
+    "mood": [
+      "dark"
+    ],
+    "color_family": "neutral",
+    "tags": [
+      "dark",
+      "aether-generated"
+    ],
+    "hyprland_version": "4.x",
+    "license": "CC-BY-4.0",
+    "preview": "preview.png",
+    "source": {
+      "type": "aether-generated",
+      "wallpaper": "wallhaven.cc"
+    },
+    "palette": {
+      "background": "#000000",
+      "foreground": "#d7d7d7",
+      "cursor": "#d7d7d7",
+      "selection_foreground": "#000000",
+      "selection_background": "#d7d7d7",
+      "border": "#0f0f0f",
+      "color0": "#000000",
+      "color1": "#939393",
+      "color2": "#bfbfbf",
+      "color3": "#eeeeee",
+      "color4": "#7d7d7d",
+      "color5": "#a9a9a9",
+      "color6": "#d7d7d7",
+      "color7": "#d7d7d7",
+      "color8": "#686163",
+      "color9": "#a5a5a5",
+      "color10": "#d3d3d3",
+      "color11": "#f5f5f5",
+      "color12": "#8f8f8f",
+      "color13": "#bcbcbc",
+      "color14": "#eaeaea",
+      "color15": "#fcfcfc",
+      "accent": "#7d7d7d",
+      "comment": "#686163"
     }
   },
   {
@@ -54,20 +150,20 @@
     "version": "1.0.0",
     "description": "A dark palette for those who desire a dark theme with vibrant, spooky colors.",
     "mood": [
-      "dark",
-      "cool",
-      "neon"
+      "dark"
     ],
-    "color_family": "purple",
+    "color_family": "blue",
     "tags": [
       "dark",
-      "popular",
-      "vibrant",
-      "purple"
+      "aether-generated"
     ],
     "hyprland_version": "4.x",
     "license": "MIT",
     "preview": "preview.png",
+    "source": {
+      "type": "aether-generated",
+      "wallpaper": "wallhaven.cc"
+    },
     "palette": {
       "background": "#282a36",
       "foreground": "#f8f8f2",
@@ -96,26 +192,74 @@
     }
   },
   {
+    "name": "Faded",
+    "slug": "faded",
+    "author": "Aether x Marketplace",
+    "version": "1.0.0",
+    "description": "Dark faded abstract digital art",
+    "mood": [
+      "dark"
+    ],
+    "color_family": "neutral",
+    "tags": [
+      "dark",
+      "aether-generated"
+    ],
+    "hyprland_version": "4.x",
+    "license": "CC-BY-4.0",
+    "preview": "preview.png",
+    "source": {
+      "type": "aether-generated",
+      "wallpaper": "wallhaven.cc"
+    },
+    "palette": {
+      "background": "#000000",
+      "foreground": "#d7d7d7",
+      "cursor": "#d7d7d7",
+      "selection_foreground": "#000000",
+      "selection_background": "#d7d7d7",
+      "border": "#0f0f0f",
+      "color0": "#000000",
+      "color1": "#939393",
+      "color2": "#bfbfbf",
+      "color3": "#eeeeee",
+      "color4": "#7d7d7d",
+      "color5": "#a9a9a9",
+      "color6": "#d7d7d7",
+      "color7": "#d7d7d7",
+      "color8": "#686163",
+      "color9": "#a5a5a5",
+      "color10": "#d3d3d3",
+      "color11": "#f5f5f5",
+      "color12": "#8f8f8f",
+      "color13": "#bcbcbc",
+      "color14": "#eaeaea",
+      "color15": "#fcfcfc",
+      "accent": "#7d7d7d",
+      "comment": "#686163"
+    }
+  },
+  {
     "name": "Gruvbox",
     "slug": "gruvbox",
     "author": "Gruvbox Community",
     "version": "1.0.0",
     "description": "A retro-inspired warm color scheme with high contrast and earthy tones.",
     "mood": [
-      "dark",
-      "warm",
-      "earthy"
+      "dark"
     ],
-    "color_family": "orange",
+    "color_family": "neutral",
     "tags": [
-      "warm",
-      "retro",
-      "high-contrast",
-      "earthy"
+      "dark",
+      "aether-generated"
     ],
     "hyprland_version": "4.x",
     "license": "MIT",
     "preview": "preview.png",
+    "source": {
+      "type": "aether-generated",
+      "wallpaper": "wallhaven.cc"
+    },
     "palette": {
       "background": "#282828",
       "foreground": "#ebdbb2",
@@ -144,26 +288,122 @@
     }
   },
   {
+    "name": "Liquid",
+    "slug": "liquid",
+    "author": "Aether x Marketplace",
+    "version": "1.0.0",
+    "description": "3D dark liquid abstract CGI",
+    "mood": [
+      "dark"
+    ],
+    "color_family": "neutral",
+    "tags": [
+      "dark",
+      "aether-generated"
+    ],
+    "hyprland_version": "4.x",
+    "license": "CC-BY-4.0",
+    "preview": "preview.png",
+    "source": {
+      "type": "aether-generated",
+      "wallpaper": "wallhaven.cc"
+    },
+    "palette": {
+      "background": "#11100c",
+      "foreground": "#def1f4",
+      "cursor": "#def1f4",
+      "selection_foreground": "#11100c",
+      "selection_background": "#def1f4",
+      "border": "#201f1b",
+      "color0": "#11100c",
+      "color1": "#b46f38",
+      "color2": "#b27731",
+      "color3": "#c69647",
+      "color4": "#667dcb",
+      "color5": "#6f76c6",
+      "color6": "#60bdee",
+      "color7": "#def1f4",
+      "color8": "#6b6a63",
+      "color9": "#e09249",
+      "color10": "#dd9b3c",
+      "color11": "#f1bc50",
+      "color12": "#889eff",
+      "color13": "#9397fd",
+      "color14": "#77dcff",
+      "color15": "#bdf7ff",
+      "accent": "#667dcb",
+      "comment": "#6b6a63"
+    }
+  },
+  {
+    "name": "Nebula",
+    "slug": "nebula",
+    "author": "Aether x Marketplace",
+    "version": "1.0.0",
+    "description": "Dark purple galaxy with cosmic tones",
+    "mood": [
+      "dark"
+    ],
+    "color_family": "neutral",
+    "tags": [
+      "dark",
+      "aether-generated"
+    ],
+    "hyprland_version": "4.x",
+    "license": "CC-BY-4.0",
+    "preview": "preview.png",
+    "source": {
+      "type": "aether-generated",
+      "wallpaper": "wallhaven.cc"
+    },
+    "palette": {
+      "background": "#06080c",
+      "foreground": "#d2a7b4",
+      "cursor": "#d2a7b4",
+      "selection_foreground": "#06080c",
+      "selection_background": "#d2a7b4",
+      "border": "#15171b",
+      "color0": "#06080c",
+      "color1": "#a28ea6",
+      "color2": "#aec5e5",
+      "color3": "#ffe2fe",
+      "color4": "#7f7c9b",
+      "color5": "#b4a4ca",
+      "color6": "#cad9ff",
+      "color7": "#d2a7b4",
+      "color8": "#5c5f64",
+      "color9": "#bba1c0",
+      "color10": "#bedcff",
+      "color11": "#ffdeff",
+      "color12": "#9490b7",
+      "color13": "#ccb7e8",
+      "color14": "#ddefff",
+      "color15": "#f6f3fe",
+      "accent": "#7f7c9b",
+      "comment": "#5c5f64"
+    }
+  },
+  {
     "name": "Nord",
     "slug": "nord",
     "author": "Arctic Ice Studio",
     "version": "1.0.0",
     "description": "An arctic, north-bluish clean and elegant theme inspired by the beauty of the arctic.",
     "mood": [
-      "dark",
-      "cool",
-      "pastel"
+      "dark"
     ],
     "color_family": "blue",
     "tags": [
-      "cool",
-      "minimal",
-      "clean",
-      "arctic"
+      "dark",
+      "aether-generated"
     ],
     "hyprland_version": "4.x",
     "license": "MIT",
     "preview": "preview.png",
+    "source": {
+      "type": "aether-generated",
+      "wallpaper": "wallhaven.cc"
+    },
     "palette": {
       "background": "#2e3440",
       "foreground": "#d8dee9",
@@ -192,26 +432,170 @@
     }
   },
   {
+    "name": "Noise",
+    "slug": "ruido",
+    "author": "Aether x Marketplace",
+    "version": "1.0.0",
+    "description": "Pure black noise texture, OLED perfect",
+    "mood": [
+      "dark"
+    ],
+    "color_family": "neutral",
+    "tags": [
+      "dark",
+      "aether-generated"
+    ],
+    "hyprland_version": "4.x",
+    "license": "CC-BY-4.0",
+    "preview": "preview.png",
+    "source": {
+      "type": "aether-generated",
+      "wallpaper": "wallhaven.cc"
+    },
+    "palette": {
+      "background": "#090909",
+      "foreground": "#d7d7d7",
+      "cursor": "#d7d7d7",
+      "selection_foreground": "#090909",
+      "selection_background": "#d7d7d7",
+      "border": "#181818",
+      "color0": "#090909",
+      "color1": "#969696",
+      "color2": "#c3c3c3",
+      "color3": "#f2f2f2",
+      "color4": "#808080",
+      "color5": "#acacac",
+      "color6": "#dadada",
+      "color7": "#d7d7d7",
+      "color8": "#62605a",
+      "color9": "#a8a8a8",
+      "color10": "#d6d6d6",
+      "color11": "#f5f5f5",
+      "color12": "#929292",
+      "color13": "#bfbfbf",
+      "color14": "#eeeeee",
+      "color15": "#fcfcfc",
+      "accent": "#808080",
+      "comment": "#62605a"
+    }
+  },
+  {
+    "name": "Memento",
+    "slug": "skull",
+    "author": "Aether x Marketplace",
+    "version": "1.0.0",
+    "description": "Dark minimalism skull art",
+    "mood": [
+      "dark"
+    ],
+    "color_family": "neutral",
+    "tags": [
+      "dark",
+      "aether-generated"
+    ],
+    "hyprland_version": "4.x",
+    "license": "CC-BY-4.0",
+    "preview": "preview.png",
+    "source": {
+      "type": "aether-generated",
+      "wallpaper": "wallhaven.cc"
+    },
+    "palette": {
+      "background": "#070707",
+      "foreground": "#b4b3b3",
+      "cursor": "#b4b3b3",
+      "selection_foreground": "#070707",
+      "selection_background": "#b4b3b3",
+      "border": "#161616",
+      "color0": "#070707",
+      "color1": "#c7807a",
+      "color2": "#fcaf7f",
+      "color3": "#ffd6a7",
+      "color4": "#ae6685",
+      "color5": "#ec8b9d",
+      "color6": "#ffc76e",
+      "color7": "#b4b3b3",
+      "color8": "#5f5d57",
+      "color9": "#e98f89",
+      "color10": "#ffbe7f",
+      "color11": "#ffce93",
+      "color12": "#cd759c",
+      "color13": "#ff96af",
+      "color14": "#ffd865",
+      "color15": "#fff1f0",
+      "accent": "#ae6685",
+      "comment": "#5f5d57"
+    }
+  },
+  {
+    "name": "Thunder",
+    "slug": "storm",
+    "author": "Aether x Marketplace",
+    "version": "1.0.0",
+    "description": "Dark storm clouds, atmospheric",
+    "mood": [
+      "dark"
+    ],
+    "color_family": "neutral",
+    "tags": [
+      "dark",
+      "aether-generated"
+    ],
+    "hyprland_version": "4.x",
+    "license": "CC-BY-4.0",
+    "preview": "preview.png",
+    "source": {
+      "type": "aether-generated",
+      "wallpaper": "wallhaven.cc"
+    },
+    "palette": {
+      "background": "#030303",
+      "foreground": "#d7d7d7",
+      "cursor": "#d7d7d7",
+      "selection_foreground": "#030303",
+      "selection_background": "#d7d7d7",
+      "border": "#121212",
+      "color0": "#030303",
+      "color1": "#939393",
+      "color2": "#bfbfbf",
+      "color3": "#eeeeee",
+      "color4": "#7d7d7d",
+      "color5": "#a9a9a9",
+      "color6": "#d7d7d7",
+      "color7": "#d7d7d7",
+      "color8": "#64625c",
+      "color9": "#a5a5a5",
+      "color10": "#d3d3d3",
+      "color11": "#f5f5f5",
+      "color12": "#8f8f8f",
+      "color13": "#bcbcbc",
+      "color14": "#eaeaea",
+      "color15": "#fcfcfc",
+      "accent": "#7d7d7d",
+      "comment": "#64625c"
+    }
+  },
+  {
     "name": "Tokyo Night",
     "slug": "tokyo-night",
     "author": "Enkia",
     "version": "1.0.0",
     "description": "A dark and vibrant theme inspired by the beauty of Tokyo's neon-lit nightscape.",
     "mood": [
-      "dark",
-      "cool",
-      "neon"
+      "dark"
     ],
-    "color_family": "blue",
+    "color_family": "neutral",
     "tags": [
       "dark",
-      "neon",
-      "vibrant",
-      "tokyo"
+      "aether-generated"
     ],
     "hyprland_version": "4.x",
     "license": "MIT",
     "preview": "preview.png",
+    "source": {
+      "type": "aether-generated",
+      "wallpaper": "wallhaven.cc"
+    },
     "palette": {
       "background": "#1a1b26",
       "foreground": "#c0caf5",
@@ -236,7 +620,103 @@
       "color14": "#7dcfff",
       "color15": "#c0caf5",
       "accent": "#7aa2f7",
-      "comment": "#565f89"
+      "comment": "#414868"
+    }
+  },
+  {
+    "name": "Urban",
+    "slug": "urban",
+    "author": "Aether x Marketplace",
+    "version": "1.0.0",
+    "description": "Architecture monochrome low light",
+    "mood": [
+      "dark"
+    ],
+    "color_family": "neutral",
+    "tags": [
+      "dark",
+      "aether-generated"
+    ],
+    "hyprland_version": "4.x",
+    "license": "CC-BY-4.0",
+    "preview": "preview.png",
+    "source": {
+      "type": "aether-generated",
+      "wallpaper": "wallhaven.cc"
+    },
+    "palette": {
+      "background": "#060709",
+      "foreground": "#dcd6c4",
+      "cursor": "#dcd6c4",
+      "selection_foreground": "#060709",
+      "selection_background": "#dcd6c4",
+      "border": "#151618",
+      "color0": "#060709",
+      "color1": "#a39070",
+      "color2": "#c3c395",
+      "color3": "#f9f1b8",
+      "color4": "#6b8666",
+      "color5": "#c7a07d",
+      "color6": "#cde0a6",
+      "color7": "#dcd6c4",
+      "color8": "#5a5d63",
+      "color9": "#bda57c",
+      "color10": "#dadb9e",
+      "color11": "#fef4ae",
+      "color12": "#7c9d76",
+      "color13": "#e6b486",
+      "color14": "#e2f9b1",
+      "color15": "#f8f5ea",
+      "accent": "#6b8666",
+      "comment": "#5a5d63"
+    }
+  },
+  {
+    "name": "Waves",
+    "slug": "waves",
+    "author": "Aether x Marketplace",
+    "version": "1.0.0",
+    "description": "Monochrome abstract wave lines",
+    "mood": [
+      "dark"
+    ],
+    "color_family": "neutral",
+    "tags": [
+      "dark",
+      "aether-generated"
+    ],
+    "hyprland_version": "4.x",
+    "license": "CC-BY-4.0",
+    "preview": "preview.png",
+    "source": {
+      "type": "aether-generated",
+      "wallpaper": "wallhaven.cc"
+    },
+    "palette": {
+      "background": "#000000",
+      "foreground": "#d7d7d7",
+      "cursor": "#d7d7d7",
+      "selection_foreground": "#000000",
+      "selection_background": "#d7d7d7",
+      "border": "#0f0f0f",
+      "color0": "#000000",
+      "color1": "#939393",
+      "color2": "#bfbfbf",
+      "color3": "#eeeeee",
+      "color4": "#7d7d7d",
+      "color5": "#a9a9a9",
+      "color6": "#d7d7d7",
+      "color7": "#d7d7d7",
+      "color8": "#686163",
+      "color9": "#a5a5a5",
+      "color10": "#d3d3d3",
+      "color11": "#f5f5f5",
+      "color12": "#8f8f8f",
+      "color13": "#bcbcbc",
+      "color14": "#eaeaea",
+      "color15": "#fcfcfc",
+      "accent": "#7d7d7d",
+      "comment": "#686163"
     }
   }
 ]

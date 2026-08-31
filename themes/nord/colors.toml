@@ -4,8 +4,6 @@ cursor = "#d8dee9"
 selection_foreground = "#2e3440"
 selection_background = "#d8dee9"
 border = "#3b4252"
-
-# Standard ANSI colors (dark)
 color0 = "#3b4252"
 color1 = "#bf616a"
 color2 = "#a3be8c"
@@ -14,8 +12,6 @@ color4 = "#81a1c1"
 color5 = "#b48ead"
 color6 = "#88c0d0"
 color7 = "#e5e9f0"
-
-# Standard ANSI colors (bright)
 color8 = "#4c566a"
 color9 = "#bf616a"
 color10 = "#a3be8c"
@@ -24,6 +20,5 @@ color12 = "#81a1c1"
 color13 = "#b48ead"
 color14 = "#88c0d0"
 color15 = "#eceff4"
-
 accent = "#88c0d0"
 comment = "#4c566a"

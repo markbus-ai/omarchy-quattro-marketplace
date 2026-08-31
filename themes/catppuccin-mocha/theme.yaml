@@ -1,18 +1,14 @@
-name: Catppuccin Mocha
-slug: catppuccin-mocha
-author: Catppuccin
-version: 1.0.0
+name: "Catppuccin Mocha"
+slug: "catppuccin-mocha"
+author: "Catppuccin"
+version: "1.0.0"
 description: "Soothing pastel theme for the high-spirited. The default dark flavor of Catppuccin."
-mood:
-  - dark
-  - cool
-  - pastel
-color_family: purple
-tags:
-  - pastel
-  - dark
-  - comfortable
-  - popular
+mood: ["dark"]
+color_family: "blue"
+tags: ["dark", "aether-generated"]
 hyprland_version: "4.x"
-license: MIT
-preview: preview.png
+license: "MIT"
+preview: "preview.png"
+source:
+  type: "aether-generated"
+  wallpaper: "wallhaven.cc"
