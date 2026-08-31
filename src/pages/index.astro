@@ -193,6 +193,24 @@ const featured = registry[0];
       grid.classList.toggle('hidden', !hasResults);
       noResults.classList.toggle('hidden', hasResults);
     }
+
+    // Share button handlers
+    document.querySelectorAll('[data-share-url]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const url = (btn as HTMLElement).dataset.shareUrl;
+        if (url) {
+          navigator.clipboard.writeText(url).then(() => {
+            const span = btn.querySelector('span');
+            if (span) {
+              span.textContent = 'Copied!';
+              setTimeout(() => { span.textContent = 'Copy link'; }, 1500);
+            }
+          });
+        }
+      });
+    });
   }
 
   initFiltering();
