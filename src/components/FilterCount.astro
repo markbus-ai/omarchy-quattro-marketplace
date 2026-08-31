@@ -1,0 +1,51 @@
+---
+/**
+ * FilterCount.astro — Shows "Showing X of Y themes" in aria-live region.
+ *
+ * Updates dynamically when filters change via "filter-change" CustomEvent.
+ */
+
+interface Props {
+  /** Total number of themes in registry */
+  totalCount: number;
+}
+
+const { totalCount } = Astro.props;
+---
+
+<div
+  aria-live="polite"
+  aria-atomic="true"
+  class="text-sm text-muted-foreground"
+  data-filter-count
+>
+  Showing <span data-count-visible>{totalCount}</span> of {totalCount} themes
+</div>
+
+<script>
+  function initFilterCount() {
+    const countEl = document.querySelector('[data-filter-count]');
+    const visibleEl = document.querySelector('[data-count-visible]');
+    if (!countEl || !visibleEl) return;
+
+    const totalCount = parseInt(countEl.textContent?.match(/of (\d+)/)?.[1] ?? '0', 10);
+
+    document.addEventListener('filter-change', () => {
+      // Count visible theme cards
+      const visibleCards = document.querySelectorAll(
+        '[data-theme-card]:not([hidden])'
+      ).length;
+
+      visibleEl.textContent = String(visibleCards);
+
+      // Update the full text for screen readers
+      const noResults = visibleCards === 0;
+      countEl.textContent = noResults
+        ? `No themes match your filters`
+        : `Showing ${visibleCards} of ${totalCount} themes`;
+    });
+  }
+
+  initFilterCount();
+  document.addEventListener('astro:page-load', initFilterCount);
+</script>
