@@ -61,6 +61,24 @@ jobs:
           # Capture exit code
           echo "exit_code=$?" >> "$GITHUB_OUTPUT"
 
+      - name: Security scan
+        id: security
+        if: steps.intake.outputs.should_validate == 'true'
+        run: |
+          # Clone the submitted repo for scanning
+          REPO_DIR="/tmp/theme-scan"
+          rm -rf "$REPO_DIR"
+          git clone --depth 1 "${{ steps.intake.outputs.repo_url }}.git" "$REPO_DIR" 2>/dev/null
+
+          # Run security scan
+          node scripts/scan-theme-security.mjs "$REPO_DIR" | tee /tmp/security-report.json
+
+          # Capture exit code
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+
+          # Cleanup
+          rm -rf "$REPO_DIR"
+
       - name: Publish validation report
         if: always() && steps.intake.outputs.should_validate == 'true'
         env:
@@ -72,18 +90,31 @@ jobs:
             echo "## 🔍 Automated Validation"
             echo ""
             if [ "${{ steps.validate.outputs.exit_code }}" = "0" ]; then
-              echo "**Status**: ✅ All checks passed"
+              echo "**Validation**: ✅ All checks passed"
             else
-              echo "**Status**: ❌ Issues found — please fix and re-trigger"
+              echo "**Validation**: ❌ Issues found — please fix and re-trigger"
+            fi
+            echo ""
+            if [ "${{ steps.security.outputs.exit_code }}" = "0" ]; then
+              echo "**Security**: ✅ Scan passed"
+            else
+              echo "**Security**: ❌ Security issues found — please fix"
             fi
             echo ""
             echo "**Theme**: ${{ steps.intake.outputs.theme_name }}"
             echo "**Repository**: ${{ steps.intake.outputs.repo_url }}"
             echo ""
             echo "<details>"
-            echo "<summary>Full validation report</summary>"
+            echo "<summary>Validation report</summary>"
             echo ""
             cat /tmp/validation-report.md
+            echo ""
+            echo "</details>"
+            echo ""
+            echo "<details>"
+            echo "<summary>Security scan report</summary>"
+            echo ""
+            cat /tmp/security-report.json 2>/dev/null || echo "No security report generated"
             echo ""
             echo "</details>"
           } > /tmp/final-report.md
@@ -100,13 +131,16 @@ jobs:
         run: |
           ISSUE_NUMBER=${{ github.event.issue.number }}
 
-          if [ "${{ steps.validate.outputs.exit_code }}" = "0" ]; then
-            # Success — add validated, remove needs-fixes
+          VALIDATION_OK="${{ steps.validate.outputs.exit_code == '0' }}"
+          SECURITY_OK="${{ steps.security.outputs.exit_code == '0' }}"
+
+          if [ "$VALIDATION_OK" = "true" ] && [ "$SECURITY_OK" = "true" ]; then
+            # Both passed — add validated, remove needs-fixes
             gh issue edit "$ISSUE_NUMBER" --add-label "validated" 2>/dev/null || true
             gh issue edit "$ISSUE_NUMBER" --remove-label "needs-fixes" 2>/dev/null || true
             echo "✅ Added 'validated' label"
           else
-            # Failure — add needs-fixes, remove validated
+            # One or both failed — add needs-fixes, remove validated
             gh issue edit "$ISSUE_NUMBER" --add-label "needs-fixes" 2>/dev/null || true
             gh issue edit "$ISSUE_NUMBER" --remove-label "validated" 2>/dev/null || true
             echo "❌ Added 'needs-fixes' label"

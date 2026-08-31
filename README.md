@@ -140,6 +140,22 @@ npm run generate     # rebuild registry.json
 
 ---
 
+## Security
+
+This marketplace performs automated security checks on submitted themes:
+
+- **Static analysis** — scans for dangerous patterns (curl-pipe-shell, sudo, eval, etc.)
+- **Exact-SHA pinning** — install commands reference the exact approved commit
+- **Maintainer review** — all themes require manual approval before publication
+
+Community themes are third-party code. Review the source before installation.
+
+Report security concerns privately via [GitHub Security Advisories](https://github.com/markbus-ai/omarchy-quattro-marketplace/security/advisories/new).
+
+See [SECURITY.md](SECURITY.md) for full details.
+
+---
+
 ## Credits
 
 - [Omarchy](https://omarchy.org) by Dizziee
