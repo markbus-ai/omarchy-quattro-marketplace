@@ -30,7 +30,7 @@ const installCommand = `omarchy-install-theme ${theme.slug}`;
   <article class="space-y-8" aria-labelledby="theme-title">
     {/* Back link */}
     <a
-      href="/"
+      href={import.meta.env.BASE_URL}
       class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
     >
       <span aria-hidden="true">&larr;</span>
