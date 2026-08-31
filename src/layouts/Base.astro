@@ -1,0 +1,53 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'Omarchy Quattro Marketplace',
+  description = 'Discover and install themes for Omarchy 4',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <a href="#content" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-accent focus:text-accent-foreground">
+      Skip to content
+    </a>
+
+    <header class="border-b border-border bg-surface">
+      <nav class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+        <a href="/" class="text-xl font-semibold text-foreground hover:text-accent-foreground">
+          Omarchy Quattro
+        </a>
+        <ul class="flex items-center gap-6">
+          <li><a href="/" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Themes</a></li>
+          <li><a href="/about" class="text-sm text-muted-foreground hover:text-foreground transition-colors">About</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="content" class="mx-auto min-h-[calc(100vh-8rem)] max-w-6xl px-6 py-10">
+      <slot />
+    </main>
+
+    <footer class="border-t border-border bg-surface">
+      <div class="mx-auto max-w-6xl px-6 py-6 text-center text-sm text-muted-foreground">
+        &copy; {new Date().getFullYear()} Omarchy Quattro Marketplace
+      </div>
+    </footer>
+  </body>
+</html>
