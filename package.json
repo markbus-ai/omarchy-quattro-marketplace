@@ -7,7 +7,8 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && pagefind --site dist",
+    "copy-themes": "node -e \"const fs=require('fs'),path=require('path');const dirs=fs.readdirSync('themes').filter(d=>fs.statSync('themes/'+d).isDirectory());dirs.forEach(d=>{const pub='public/themes/'+d;fs.mkdirSync(pub,{recursive:true});const src='themes/'+d+'/preview.png';if(fs.existsSync(src))fs.copyFileSync(src,pub+'/preview.png');});console.log('Copied previews for',dirs.length,'themes')\"",
+    "build": "npm run copy-themes && astro build && pagefind --site dist",
     "preview": "astro preview",
     "astro": "astro",
     "generate": "tsx scripts/generate-registry.ts",
