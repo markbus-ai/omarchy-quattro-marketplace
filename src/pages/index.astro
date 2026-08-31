@@ -33,18 +33,17 @@ const registry: ThemeRegistry = await import('../../registry.json').then(
 
     {/* Theme Grid */}
     {registry.length > 0 ? (
-      <div
+      <ul
         class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-        role="list"
         aria-label="Available themes"
         data-theme-grid
       >
         {registry.map((theme) => (
-          <div role="listitem" data-theme-item>
+          <li data-theme-item>
             <ThemeCard theme={theme} />
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
     ) : (
       <EmptyState
         title="No themes yet"

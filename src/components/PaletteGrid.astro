@@ -64,10 +64,9 @@ const swatchSize = size === 'lg' ? 'w-12 h-12' : 'w-7 h-7';
 const textSize = size === 'lg' ? 'text-xs' : 'text-[0.625rem]';
 ---
 
-<div
+<ul
   class="grid gap-1.5"
   class:list={size === 'lg' ? 'grid-cols-6 sm:grid-cols-8' : 'grid-cols-6'}
-  role="list"
   aria-label="Color palette"
 >
   {PALETTE_KEYS.map((key) => {
@@ -76,25 +75,22 @@ const textSize = size === 'lg' ? 'text-xs' : 'text-[0.625rem]';
     const fg = textColor(hex);
 
     return (
-      <div
-        role="listitem"
+      <li
         class="group relative"
+        title={`${label}: ${hex}`}
       >
-        <button
-          type="button"
-          tabindex="0"
-          aria-label={`${label}: ${hex}`}
+        <span
           class:list={[
             swatchSize,
-            'rounded-sm border border-border/50 transition-transform',
-            'hover:scale-125 hover:z-10 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1 focus:ring-offset-background',
+            'block rounded-sm border border-border/50 transition-transform',
+            'hover:scale-125 hover:z-10',
           ]}
           style={`background-color: ${hex}; color: ${fg};`}
         >
           {size === 'lg' && (
-            <span class={`sr-only`}>{label}</span>
+            <span class="sr-only">{label}</span>
           )}
-        </button>
+        </span>
 
         {/* Tooltip */}
         <div
@@ -104,7 +100,7 @@ const textSize = size === 'lg' ? 'text-xs' : 'text-[0.625rem]';
           <span class="font-medium">{label}</span>
           <span class="ml-1 font-mono text-muted-foreground">{hex}</span>
         </div>
-      </div>
+      </li>
     );
   })}
-</div>
+</ul>
