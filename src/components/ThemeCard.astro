@@ -1,0 +1,58 @@
+---
+/**
+ * ThemeCard.astro — A card displaying theme preview, name, author, mood tags, and palette.
+ *
+ * Links to the theme detail page. Fully accessible with aria-label and focus ring.
+ */
+
+import PaletteGrid from './PaletteGrid.astro';
+import type { ThemeRegistryEntry } from '../data/theme-schema';
+
+interface Props {
+  theme: ThemeRegistryEntry;
+}
+
+const { theme } = Astro.props;
+---
+
+<article
+  class="group rounded-lg border border-border bg-surface transition-colors hover:border-accent/50"
+  aria-label={`Theme: ${theme.name} by ${theme.author}`}
+>
+  <a href={`/themes/${theme.slug}`} class="block focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-lg">
+    {/* Preview image */}
+    <div class="relative aspect-[16/10] overflow-hidden rounded-t-lg bg-background">
+      <img
+        src={`/themes/${theme.slug}/${theme.preview}`}
+        alt={`Preview of ${theme.name} theme`}
+        class="h-full w-full object-cover transition-transform group-hover:scale-105"
+        loading="lazy"
+        decoding="async"
+        width="640"
+        height="400"
+      />
+    </div>
+
+    <div class="p-4 space-y-3">
+      {/* Title and author */}
+      <div>
+        <h3 class="text-base font-semibold text-foreground group-hover:text-accent transition-colors">
+          {theme.name}
+        </h3>
+        <p class="text-sm text-muted-foreground">by {theme.author}</p>
+      </div>
+
+      {/* Mood tags */}
+      <div class="flex flex-wrap gap-1.5">
+        {theme.mood.map((tag) => (
+          <span class="inline-flex items-center rounded-full bg-background px-2 py-0.5 text-xs font-medium text-muted-foreground border border-border">
+            {tag}
+          </span>
+        ))}
+      </div>
+
+      {/* Palette grid */}
+      <PaletteGrid palette={theme.palette} size="sm" />
+    </div>
+  </a>
+</article>
