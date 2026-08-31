@@ -1,0 +1,83 @@
+name: Approve and publish theme
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: write
+  issues: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: catalog-writes
+  cancel-in-progress: false
+
+jobs:
+  approve:
+    if: >-
+      github.event.label.name == 'approved-and-verified' &&
+      github.event.issue.state == 'open' &&
+      contains(github.event.issue.labels.*.name, 'submission')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run approval script
+        id: approval
+        env:
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          APPROVER: ${{ github.actor }}
+        run: node scripts/approve-submission.mjs
+
+      - name: Regenerate registry
+        run: npm run generate
+
+      - name: Build site
+        run: npm run build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
+
+      - name: Update issue labels
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          # Remove 'submission', 'validated', 'approved-and-verified'
+          # Add 'listed'
+          gh issue edit "$ISSUE_NUMBER" --remove-label "submission,validated,approved-and-verified" --add-label "listed" 2>/dev/null || true
+
+      - name: Comment on issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          THEME_NAME: ${{ steps.approval.outputs.theme_name }}
+        run: |
+          # Post comment: "Theme '{name}' is now live at {url}"
+          SITE_URL="https://markbus-ai.github.io/omarchy-quattro-marketplace/"
+          gh issue comment "$ISSUE_NUMBER" --body "Theme **${{ env.THEME_NAME }}** is now live in the marketplace! 🎉\n\nView it here: ${SITE_URL}themes/${{ env.THEME_NAME }}/"
