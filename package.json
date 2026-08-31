@@ -15,7 +15,8 @@
     "search:dev": "pagefind --site dist --serve",
     "intake": "node scripts/intake-submission.mjs",
     "validate-repo": "node scripts/validate-theme-repo.mjs",
-    "publish-report": "node scripts/publish-report.mjs"
+    "publish-report": "node scripts/publish-report.mjs",
+    "approve": "node scripts/approve-submission.mjs"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",

@@ -222,7 +222,7 @@ async function main() {
 
     // If no errors for this theme, add to registry
     if (paletteErrors.length === 0 && metaErrors.length === 0 && slug) {
-      registry.push({
+      const entry: ThemeRegistryEntry = {
         name: yamlData.name as string,
         slug,
         author: yamlData.author as string,
@@ -235,8 +235,10 @@ async function main() {
         license: yamlData.license as string,
         preview: yamlData.preview as string,
         install_url: yamlData.install_url as string | undefined,
+        source: yamlData.source as ThemeMetadata["source"] | undefined,
         palette,
-      });
+      };
+      registry.push(entry);
     }
   }
 

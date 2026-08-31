@@ -122,6 +122,14 @@ export interface ThemeMetadata {
 
   /** Optional URL to upstream repository. */
   install_url?: string;
+
+  /** Source provenance for submitted themes (set by the approval workflow). */
+  source?: {
+    repository: string;
+    commit?: string;
+    submitted_by?: string;
+    approved_at?: string;
+  };
 }
 
 // ---------------------------------------------------------------------------
