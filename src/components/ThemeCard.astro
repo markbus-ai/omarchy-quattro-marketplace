@@ -87,6 +87,19 @@ const stats = inferStats(theme.palette);
   data-theme-color={theme.color_family}
   data-theme-tags={theme.tags.join(',')}
 >
+  {/* Share button — positioned outside <a> for valid HTML */}
+  <button
+    type="button"
+    class="absolute right-2 bottom-2 z-10 flex items-center gap-1 rounded-md bg-background/80 px-2 py-1 text-xs font-medium text-muted-foreground hover:text-foreground backdrop-blur-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+    aria-label={`Copy link to ${theme.name}`}
+    data-share-url={`${Astro.url.origin}${import.meta.env.BASE_URL}/themes/${theme.slug}`}
+  >
+    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+    </svg>
+    <span>Copy link</span>
+  </button>
+
   <a
     href={`${import.meta.env.BASE_URL}/themes/${theme.slug}`}
     class="block focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-xl"
@@ -131,18 +144,6 @@ const stats = inferStats(theme.palette);
           </h3>
           <p class="text-xs text-muted-foreground mt-0.5">by {theme.author}</p>
         </div>
-        {/* Share button */}
-        <button
-          type="button"
-          class="shrink-0 flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-surface transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-          aria-label={`Share ${theme.name}`}
-          data-share-url={`${Astro.url.origin}${import.meta.env.BASE_URL}/themes/${theme.slug}`}
-        >
-          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
-          </svg>
-          <span>Copy link</span>
-        </button>
       </div>
 
       {/* Palette grid */}
