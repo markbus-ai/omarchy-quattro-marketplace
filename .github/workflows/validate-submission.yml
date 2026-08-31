@@ -1,0 +1,113 @@
+name: Validate Submission
+
+on:
+  issues:
+    types: [opened, edited, labeled]
+
+permissions:
+  issues: write
+  contents: read
+
+concurrency:
+  group: submission-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate Theme Submission
+    runs-on: ubuntu-latest
+    # Only run for submission issues
+    if: >-
+      startsWith(github.event.issue.title, '[Theme]:') ||
+      contains(github.event.issue.labels.*.name, 'submission')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Parse intake
+        id: intake
+        env:
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: node scripts/intake-submission.mjs
+
+      - name: Validate theme repository
+        id: validate
+        if: steps.intake.outputs.should_validate == 'true'
+        env:
+          REPO_URL: ${{ steps.intake.outputs.repo_url }}
+          # Use HEAD for now — the submitter's latest commit
+          COMMIT_SHA: HEAD
+        run: |
+          # Get the default branch's HEAD from the submitted repo
+          DEFAULT_BRANCH=$(git ls-remote --symref "${{ steps.intake.outputs.repo_url }}.git" HEAD | head -1 | awk '{print $1}')
+          echo "commit_sha=${DEFAULT_BRANCH}" >> "$GITHUB_OUTPUT"
+
+          # Run validation and capture output
+          node scripts/validate-theme-repo.mjs \
+            --repo_url "${{ steps.intake.outputs.repo_url }}" \
+            --commit_sha "${DEFAULT_BRANCH}" \
+            | tee /tmp/validation-report.md
+
+          # Capture exit code
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Publish validation report
+        if: always() && steps.intake.outputs.should_validate == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Build the report file with status header
+          {
+            echo "<!-- validation-report -->"
+            echo "## 🔍 Automated Validation"
+            echo ""
+            if [ "${{ steps.validate.outputs.exit_code }}" = "0" ]; then
+              echo "**Status**: ✅ All checks passed"
+            else
+              echo "**Status**: ❌ Issues found — please fix and re-trigger"
+            fi
+            echo ""
+            echo "**Theme**: ${{ steps.intake.outputs.theme_name }}"
+            echo "**Repository**: ${{ steps.intake.outputs.repo_url }}"
+            echo ""
+            echo "<details>"
+            echo "<summary>Full validation report</summary>"
+            echo ""
+            cat /tmp/validation-report.md
+            echo ""
+            echo "</details>"
+          } > /tmp/final-report.md
+
+          node scripts/publish-report.mjs \
+            --issue=${{ github.event.issue.number }} \
+            --file=/tmp/final-report.md \
+            --marker="<!-- validation-report -->"
+
+      - name: Update issue labels
+        if: always() && steps.intake.outputs.should_validate == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ISSUE_NUMBER=${{ github.event.issue.number }}
+
+          if [ "${{ steps.validate.outputs.exit_code }}" = "0" ]; then
+            # Success — add validated, remove needs-fixes
+            gh issue edit "$ISSUE_NUMBER" --add-label "validated" 2>/dev/null || true
+            gh issue edit "$ISSUE_NUMBER" --remove-label "needs-fixes" 2>/dev/null || true
+            echo "✅ Added 'validated' label"
+          else
+            # Failure — add needs-fixes, remove validated
+            gh issue edit "$ISSUE_NUMBER" --add-label "needs-fixes" 2>/dev/null || true
+            gh issue edit "$ISSUE_NUMBER" --remove-label "validated" 2>/dev/null || true
+            echo "❌ Added 'needs-fixes' label"
+          fi
