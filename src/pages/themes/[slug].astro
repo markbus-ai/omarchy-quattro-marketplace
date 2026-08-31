@@ -61,7 +61,7 @@ const installCommand = `omarchy-install-theme ${theme.slug}`;
         {/* Preview image */}
         <div class="overflow-hidden rounded-lg border border-border">
           <img
-            src={`/themes/${theme.slug}/${theme.preview}`}
+            src={`${import.meta.env.BASE_URL}/themes/${theme.slug}/${theme.preview}`}
             alt={`Preview of ${theme.name} theme`}
             class="w-full object-cover"
             width="960"
