@@ -4,7 +4,7 @@
  * Copies preview.png and wallpaper.jpg from themes/ to public/themes/
  */
 
-import { readdirSync, mkdirSync, copyFileSync, existsSync } from "node:fs";
+import { readdirSync, mkdirSync, copyFileSync, existsSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 const themesDir = "themes";
@@ -12,7 +12,7 @@ const publicDir = "public/themes";
 
 const dirs = readdirSync(themesDir).filter((d) => {
   try {
-    return require("node:fs").statSync(join(themesDir, d)).isDirectory();
+    return statSync(join(themesDir, d)).isDirectory();
   } catch {
     return false;
   }
