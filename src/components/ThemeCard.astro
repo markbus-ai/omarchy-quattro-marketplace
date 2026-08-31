@@ -75,12 +75,8 @@ const colorDots: Record<string, string> = {
         <p class="text-xs text-muted-foreground mt-0.5">by {theme.author}</p>
       </div>
 
-      {/* Palette strip — full 24 colors in one row */}
-      <div class="flex h-2 overflow-hidden rounded-full" aria-label="Color palette preview">
-        {Object.values(theme.palette).map((hex) => (
-          <span class="flex-1 h-full" style={`background-color: ${hex}`} aria-hidden="true"></span>
-        ))}
-      </div>
+      {/* Palette grid */}
+      <PaletteGrid palette={theme.palette} size="sm" />
 
       {/* Mood tags */}
       <div class="flex flex-wrap gap-1.5">
