@@ -44,6 +44,7 @@ const LABELS: Record<string, string> = {
   color14: 'Bright Cyan',
   color15: 'Bright White',
   accent: 'Accent',
+  comment: 'Comment',
 };
 
 /** Compute relative luminance for contrast calculation. */
@@ -84,7 +85,7 @@ const swatchSize = size === 'lg' ? 'w-10 h-10' : 'w-7 h-7';
         <span
           class:list={[
             swatchSize,
-            'block rounded-sm border border-border/50 transition-transform',
+            'block rounded-sm border-2 border-white/20 transition-transform',
             'hover:scale-125 hover:z-10',
           ]}
           style={`background-color: ${hex}; color: ${fg};`}
