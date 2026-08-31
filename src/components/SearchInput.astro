@@ -1,11 +1,10 @@
 ---
 /**
- * SearchInput.astro — Debounced text search input with live results count.
+ * SearchInput.astro — Debounced text search input.
  *
  * Features:
  * - 300ms debounce on input
  * - aria-label for accessibility
- * - aria-live region announces results count
  * - Dispatches "filter-change" CustomEvent on the document
  */
 
@@ -42,14 +41,6 @@ const { totalCount } = Astro.props;
       class="w-full rounded-lg border border-border/50 bg-background py-2 pl-10 pr-4 text-sm text-foreground placeholder-muted-foreground/60 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 transition-colors"
       data-search-input
     />
-  </div>
-  <div
-    aria-live="polite"
-    aria-atomic="true"
-    class="mt-2 text-xs text-muted-foreground"
-    data-search-status
-  >
-    Showing {totalCount} of {totalCount} themes
   </div>
 </div>
 
