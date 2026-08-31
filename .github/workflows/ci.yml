@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  validate-themes:
+    name: Validate Themes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate theme YAML and TOML
+        run: npm run validate
+
+      - name: Check palette key count (must be 24 per theme)
+        run: |
+          node -e "
+          const registry = require('./registry.json');
+          let failed = false;
+          for (const theme of registry) {
+            const keys = Object.keys(theme.palette).length;
+            if (keys !== 24) {
+              console.error('✖ ' + theme.slug + ': expected 24 palette keys, found ' + keys);
+              failed = true;
+            } else {
+              console.log('✔ ' + theme.slug + ': 24 palette keys');
+            }
+          }
+          if (failed) process.exit(1);
+          "
+
+      - name: Verify preview.png exists for each theme
+        run: |
+          node -e "
+          const fs = require('fs');
+          const path = require('path');
+          const registry = require('./registry.json');
+          let failed = false;
+          for (const theme of registry) {
+            const previewPath = path.join('themes', theme.slug, 'preview.png');
+            if (!fs.existsSync(previewPath)) {
+              console.error('✖ ' + theme.slug + ': missing preview.png');
+              failed = true;
+            } else {
+              const stat = fs.statSync(previewPath);
+              console.log('✔ ' + theme.slug + ': preview.png (' + Math.round(stat.size / 1024) + 'KB)');
+            }
+          }
+          if (failed) process.exit(1);
+          "
+
+  build:
+    name: Build & Validate HTML
+    runs-on: ubuntu-latest
+    needs: validate-themes
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build with Astro
+        run: npm run build
+
+      - name: Install html-validate
+        run: npm install --no-save html-validate
+
+      - name: Validate HTML output
+        run: |
+          npx html-validate "dist/**/*.html" \
+            --config <(cat <<'EOF'
+          {
+            "extends": ["html-validate:recommended"],
+            "rules": {
+              "no-trailing-whitespace": "error",
+              "no-unused-disable": "error",
+              "require-doctype": "error",
+              "require-lang-attr": "error",
+              "no-redundant-aria": "error",
+              "aria-role-misc": "off",
+              "element-required-attributes": "off"
+            }
+          }
+          EOF
+          )
