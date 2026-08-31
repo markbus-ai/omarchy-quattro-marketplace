@@ -10,22 +10,49 @@ import type { ThemeRegistry } from '../data/theme-schema';
 const registry: ThemeRegistry = await import('../../registry.json').then(
   (m) => m.default,
 );
+
+// Featured theme (first one or random)
+const featured = registry[0];
 ---
 
 <Base title="Omarchy Quattro Marketplace — Themes">
   <section class="space-y-8">
-    {/* Hero */}
-    <header class="space-y-3 pb-2">
-      <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-        Theme Marketplace
-      </h1>
-      <p class="max-w-2xl text-base text-muted-foreground">
-        Browse and install themes for Omarchy 4. Each theme includes a complete
-        24-color palette for your terminal, editor, and desktop.
-      </p>
+    {/* Hero with featured theme */}
+    <header class="relative overflow-hidden rounded-2xl border border-border/50 bg-gradient-to-br from-surface via-background to-surface p-6 sm:p-8">
+      <div class="relative z-10">
+        <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+          Theme Marketplace
+        </h1>
+        <p class="mt-2 max-w-2xl text-base text-muted-foreground">
+          Browse and install themes for Omarchy 4. Each theme includes a complete
+          24-color palette for your terminal, editor, and desktop.
+        </p>
+        <div class="mt-4 flex items-center gap-4 text-sm text-muted-foreground">
+          <span class="flex items-center gap-1.5">
+            <svg class="h-4 w-4 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+            </svg>
+            {registry.length} themes
+          </span>
+          <span class="flex items-center gap-1.5">
+            <svg class="h-4 w-4 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Verified
+          </span>
+          <span class="flex items-center gap-1.5">
+            <svg class="h-4 w-4 text-yellow-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+            SHA Pinned
+          </span>
+        </div>
+      </div>
+      {/* Decorative gradient orb */}
+      <div class="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-accent/10 blur-3xl" aria-hidden="true"></div>
     </header>
 
-    {/* Search and Filters — collapsed by default on mobile */}
+    {/* Search and Filters */}
     <div class="rounded-xl border border-border/50 bg-surface/50 p-4 sm:p-6">
       <SearchInput totalCount={registry.length} />
       <div class="mt-3">

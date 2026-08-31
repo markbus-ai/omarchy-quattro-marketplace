@@ -1,8 +1,13 @@
 ---
 /**
- * ThemeCard.astro — A card displaying theme preview, name, author, mood tags, and palette.
+ * ThemeCard.astro — A card displaying theme preview, name, author, mood tags, palette, and stats.
  *
- * Links to the theme detail page. Fully accessible with aria-label and focus ring.
+ * Features:
+ * - Quick Look preview on hover (full wallpaper overlay)
+ * - Color family badge with dot
+ * - Inferred stats (palette diversity, contrast, warmth)
+ * - Share button
+ * - Links to theme detail page
  */
 
 import PaletteGrid from './PaletteGrid.astro';
@@ -26,6 +31,50 @@ const colorDots: Record<string, string> = {
   pink: '#ec4899',
   neutral: '#71717a',
 };
+
+/** Infer stats from palette */
+function inferStats(palette: Record<string, string>) {
+  // Count unique hue families in ANSI colors
+  const hues = new Set<string>();
+  for (let i = 1; i <= 6; i++) {
+    const hex = palette[`color${i}`];
+    if (!hex) continue;
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    if (max - min < 30) { hues.add('neutral'); continue; }
+    if (r > g && r > b) hues.add('red');
+    else if (g > r && g > b) hues.add('green');
+    else if (b > r && b > g) hues.add('blue');
+    else if (r > b && g > b) hues.add('yellow');
+    else if (r > g && b > g) hues.add('magenta');
+    else hues.add('cyan');
+  }
+
+  // Contrast ratio (approximate)
+  const bg = palette.background || '#000000';
+  const fg = palette.foreground || '#ffffff';
+  const bgL = 0.299 * parseInt(bg.slice(1, 3), 16) + 0.587 * parseInt(bg.slice(3, 5), 16) + 0.114 * parseInt(bg.slice(5, 7), 16);
+  const fgL = 0.299 * parseInt(fg.slice(1, 3), 16) + 0.587 * parseInt(fg.slice(3, 5), 16) + 0.114 * parseInt(fg.slice(5, 7), 16);
+  const contrast = Math.max(bgL, fgL) / Math.min(bgL, fgL);
+
+  // Warmth (red+yellow vs blue+cyan)
+  const accent = palette.accent || '#888888';
+  const ar = parseInt(accent.slice(1, 3), 16);
+  const ag = parseInt(accent.slice(3, 5), 16);
+  const ab = parseInt(accent.slice(5, 7), 16);
+  const warmth = ar > ab ? 'warm' : ar < ab ? 'cool' : 'neutral';
+
+  return {
+    diversity: hues.size,
+    contrast: contrast > 10 ? 'high' : contrast > 5 ? 'medium' : 'low',
+    warmth,
+  };
+}
+
+const stats = inferStats(theme.palette);
 ---
 
 <article
@@ -64,24 +113,66 @@ const colorDots: Record<string, string> = {
         ></span>
         {theme.color_family}
       </span>
+
+      {/* Quick Look overlay on hover */}
+      <div class="absolute inset-0 flex items-center justify-center bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 backdrop-blur-sm">
+        <span class="text-sm font-medium text-foreground bg-surface/90 px-4 py-2 rounded-lg border border-border">
+          Quick Look
+        </span>
+      </div>
     </div>
 
     <div class="p-4 space-y-3">
       {/* Title and author */}
-      <div>
-        <h3 class="text-base font-semibold text-foreground group-hover:text-accent transition-colors duration-200">
-          {theme.name}
-        </h3>
-        <p class="text-xs text-muted-foreground mt-0.5">by {theme.author}</p>
+      <div class="flex items-start justify-between gap-2">
+        <div class="min-w-0">
+          <h3 class="text-base font-semibold text-foreground group-hover:text-accent transition-colors duration-200 truncate">
+            {theme.name}
+          </h3>
+          <p class="text-xs text-muted-foreground mt-0.5">by {theme.author}</p>
+        </div>
+        {/* Share button */}
+        <button
+          type="button"
+          class="shrink-0 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-surface transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          aria-label={`Share ${theme.name}`}
+          onclick={`event.preventDefault(); event.stopPropagation(); navigator.clipboard.writeText('${Astro.url.origin}${import.meta.env.BASE_URL}/themes/${theme.slug}'); this.innerHTML='<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>'; setTimeout(()=>this.innerHTML='<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8m-4-6l-4-4m0 0l4-4m-4 4h11"/></svg>',1500)`}
+        >
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8m-4-6l-4-4m0 0l4-4m-4 4h11"/>
+          </svg>
+        </button>
       </div>
 
       {/* Palette grid */}
       <PaletteGrid palette={theme.palette} size="sm" />
 
+      {/* Stats row */}
+      <div class="flex items-center gap-3 text-[0.65rem] text-muted-foreground">
+        <span class="flex items-center gap-1" title="Color diversity">
+          <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+          </svg>
+          {stats.diversity} hues
+        </span>
+        <span class="flex items-center gap-1" title="Contrast ratio">
+          <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+          {stats.contrast}
+        </span>
+        <span class="flex items-center gap-1" title="Color temperature">
+          <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          {stats.warmth}
+        </span>
+      </div>
+
       {/* Mood tags */}
       <div class="flex flex-wrap gap-1.5">
         {theme.mood.map((tag) => (
-          <span class="inline-flex items-center rounded-full bg-background px-2 py-0.5 text-[0.65rem] font-medium text-muted-foreground border border-border">
+          <span class="inline-flex items-center rounded-full bg-accent/10 px-2 py-0.5 text-[0.65rem] font-medium text-accent border border-accent/20">
             {tag}
           </span>
         ))}

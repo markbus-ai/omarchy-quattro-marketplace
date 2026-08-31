@@ -36,21 +36,39 @@ const { theme } = Astro.props;
     </a>
 
     {/* Header */}
-    <header class="space-y-4">
-      <div class="flex flex-wrap items-baseline gap-3">
-        <h1 id="theme-title" class="text-3xl font-bold tracking-tight text-foreground">
-          {theme.name}
-        </h1>
-        <span class="text-sm text-muted-foreground">v{theme.version}</span>
+    <header class="relative overflow-hidden rounded-2xl border border-border/50 bg-gradient-to-br from-surface via-background to-surface p-6 sm:p-8">
+      <div class="relative z-10">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <div class="flex flex-wrap items-baseline gap-3">
+              <h1 id="theme-title" class="text-3xl font-bold tracking-tight text-foreground">
+                {theme.name}
+              </h1>
+              <span class="text-sm text-muted-foreground">v{theme.version}</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mt-2">
+              <span>by <strong class="font-medium text-foreground">{theme.author}</strong></span>
+              <span aria-hidden="true">·</span>
+              <span>{theme.license}</span>
+              <span aria-hidden="true">·</span>
+              <span>Hyprland {theme.hyprland_version}</span>
+            </div>
+          </div>
+          {/* Share button */}
+          <button
+            type="button"
+            class="shrink-0 flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-accent/50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            onclick={`navigator.clipboard.writeText(window.location.href); this.innerHTML='<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Copied!'; setTimeout(()=>this.innerHTML='<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8m-4-6l-4-4m0 0l4-4m-4 4h11"/></svg> Share',1500)`}
+          >
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8m-4-6l-4-4m0 0l4-4m-4 4h11"/>
+            </svg>
+            Share
+          </button>
+        </div>
       </div>
-
-      <div class="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-        <span>by <strong class="font-medium text-foreground">{theme.author}</strong></span>
-        <span aria-hidden="true">·</span>
-        <span>{theme.license}</span>
-        <span aria-hidden="true">·</span>
-        <span>Hyprland {theme.hyprland_version}</span>
-      </div>
+      {/* Decorative gradient orb */}
+      <div class="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-accent/10 blur-3xl" aria-hidden="true"></div>
     </header>
 
     <div class="grid gap-8 lg:grid-cols-[1fr_320px]">
