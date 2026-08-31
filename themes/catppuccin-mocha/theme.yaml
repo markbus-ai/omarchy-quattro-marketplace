@@ -1,0 +1,18 @@
+name: Catppuccin Mocha
+slug: catppuccin-mocha
+author: Catppuccin
+version: 1.0.0
+description: "Soothing pastel theme for the high-spirited. The default dark flavor of Catppuccin."
+mood:
+  - dark
+  - cool
+  - pastel
+color_family: purple
+tags:
+  - pastel
+  - dark
+  - comfortable
+  - popular
+hyprland_version: "4.x"
+license: MIT
+preview: preview.png

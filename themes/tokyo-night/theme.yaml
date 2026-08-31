@@ -1,0 +1,18 @@
+name: Tokyo Night
+slug: tokyo-night
+author: Enkia
+version: 1.0.0
+description: "A dark and vibrant theme inspired by the beauty of Tokyo's neon-lit nightscape."
+mood:
+  - dark
+  - cool
+  - neon
+color_family: blue
+tags:
+  - dark
+  - neon
+  - vibrant
+  - tokyo
+hyprland_version: "4.x"
+license: MIT
+preview: preview.png
