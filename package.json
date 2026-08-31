@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "copy-themes": "node -e \"const fs=require('fs'),path=require('path');const dirs=fs.readdirSync('themes').filter(d=>fs.statSync('themes/'+d).isDirectory());dirs.forEach(d=>{const pub='public/themes/'+d;fs.mkdirSync(pub,{recursive:true});const src='themes/'+d+'/preview.png';if(fs.existsSync(src))fs.copyFileSync(src,pub+'/preview.png');});console.log('Copied previews for',dirs.length,'themes')\"",
+    "copy-themes": "node scripts/copy-themes.mjs",
     "build": "npm run copy-themes && astro build && pagefind --site dist",
     "preview": "astro preview",
     "astro": "astro",
