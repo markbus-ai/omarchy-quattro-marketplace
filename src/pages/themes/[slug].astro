@@ -141,7 +141,7 @@ const { theme } = Astro.props;
           {theme.source?.repository ? (
             <div>
               <div class="flex items-center gap-2 rounded bg-surface px-3 py-2 font-mono text-sm text-foreground border border-border">
-                <code class="flex-1 overflow-x-auto">git clone {theme.source.repository}.git /tmp/omarchy-theme && cd /tmp/omarchy-theme && git checkout {theme.source.commit || 'HEAD'} && cp -r . ~/.config/omarchy/themes/{theme.slug} && cd ~ && rm -rf /tmp/omarchy-theme</code>
+                <code class="flex-1 overflow-x-auto">git clone {theme.source.repository}.git /tmp/omarchy-theme &amp;&amp; cd /tmp/omarchy-theme &amp;&amp; git checkout {theme.source.commit || 'HEAD'} &amp;&amp; cp -r . ~/.config/omarchy/themes/{theme.slug} &amp;&amp; cd ~ &amp;&amp; rm -rf /tmp/omarchy-theme</code>
                 <button
                   type="button"
                   class="shrink-0 rounded p-1 text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
@@ -159,7 +159,7 @@ const { theme } = Astro.props;
           ) : (
             <div>
               <div class="flex items-center gap-2 rounded bg-surface px-3 py-2 font-mono text-sm text-foreground border border-border">
-                <code class="flex-1 overflow-x-auto">git clone --depth 1 https://github.com/markbus-ai/omarchy-quattro-marketplace.git /tmp/omarchy-marketplace && cp -r /tmp/omarchy-marketplace/themes/{theme.slug} ~/.config/omarchy/themes/ && rm -rf /tmp/omarchy-marketplace</code>
+                <code class="flex-1 overflow-x-auto">git clone --depth 1 https://github.com/markbus-ai/omarchy-quattro-marketplace.git /tmp/omarchy-marketplace &amp;&amp; cp -r /tmp/omarchy-marketplace/themes/{theme.slug} ~/.config/omarchy/themes/ &amp;&amp; rm -rf /tmp/omarchy-marketplace</code>
                 <button
                   type="button"
                   class="shrink-0 rounded p-1 text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
