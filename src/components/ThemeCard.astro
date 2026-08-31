@@ -6,17 +6,30 @@
  */
 
 import PaletteGrid from './PaletteGrid.astro';
-import type { ThemeRegistryEntry } from '../data/theme-schema';
+import type { ThemeRegistryEntry } from '../data/schema';
 
 interface Props {
   theme: ThemeRegistryEntry;
 }
 
 const { theme } = Astro.props;
+
+/** Color dot for the color family badge */
+const colorDots: Record<string, string> = {
+  red: '#ef4444',
+  orange: '#f97316',
+  yellow: '#eab308',
+  green: '#22c55e',
+  cyan: '#06b6d4',
+  blue: '#3b82f6',
+  purple: '#a855f7',
+  pink: '#ec4899',
+  neutral: '#71717a',
+};
 ---
 
 <article
-  class="group rounded-lg border border-border bg-surface transition-colors hover:border-accent/50"
+  class="group relative rounded-xl border border-border bg-surface transition-all duration-200 hover:border-accent/40 hover:shadow-lg hover:shadow-accent/5"
   aria-label={`Theme: ${theme.name} by ${theme.author}`}
   data-theme-card
   data-theme-name={theme.name.toLowerCase()}
@@ -25,40 +38,58 @@ const { theme } = Astro.props;
   data-theme-color={theme.color_family}
   data-theme-tags={theme.tags.join(',')}
 >
-  <a href={`${import.meta.env.BASE_URL}/themes/${theme.slug}`} class="block focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-lg">
+  <a
+    href={`${import.meta.env.BASE_URL}/themes/${theme.slug}`}
+    class="block focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-xl"
+  >
     {/* Preview image */}
-    <div class="relative aspect-[16/10] overflow-hidden rounded-t-lg bg-background">
+    <div class="relative aspect-[16/10] overflow-hidden rounded-t-xl bg-background">
       <img
         src={`${import.meta.env.BASE_URL}/themes/${theme.slug}/${theme.preview}`}
         alt={`Preview of ${theme.name} theme`}
-        class="h-full w-full object-cover transition-transform group-hover:scale-105"
+        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         loading="lazy"
         decoding="async"
         width="640"
         height="400"
       />
+      {/* Color family badge */}
+      <span
+        class="absolute right-2 top-2 flex items-center gap-1.5 rounded-full bg-background/80 px-2 py-0.5 text-[0.65rem] font-medium text-foreground backdrop-blur-sm"
+      >
+        <span
+          class="inline-block h-2 w-2 rounded-full"
+          style={`background-color: ${colorDots[theme.color_family] ?? '#71717a'}`}
+          aria-hidden="true"
+        ></span>
+        {theme.color_family}
+      </span>
     </div>
 
     <div class="p-4 space-y-3">
       {/* Title and author */}
       <div>
-        <h3 class="text-base font-semibold text-foreground group-hover:text-accent transition-colors">
+        <h3 class="text-base font-semibold text-foreground group-hover:text-accent transition-colors duration-200">
           {theme.name}
         </h3>
-        <p class="text-sm text-muted-foreground">by {theme.author}</p>
+        <p class="text-xs text-muted-foreground mt-0.5">by {theme.author}</p>
+      </div>
+
+      {/* Palette strip — full 24 colors in one row */}
+      <div class="flex h-2 overflow-hidden rounded-full" aria-label="Color palette preview">
+        {Object.values(theme.palette).map((hex) => (
+          <span class="flex-1 h-full" style={`background-color: ${hex}`} aria-hidden="true"></span>
+        ))}
       </div>
 
       {/* Mood tags */}
       <div class="flex flex-wrap gap-1.5">
         {theme.mood.map((tag) => (
-          <span class="inline-flex items-center rounded-full bg-background px-2 py-0.5 text-xs font-medium text-muted-foreground border border-border">
+          <span class="inline-flex items-center rounded-full bg-background px-2 py-0.5 text-[0.65rem] font-medium text-muted-foreground border border-border">
             {tag}
           </span>
         ))}
       </div>
-
-      {/* Palette grid */}
-      <PaletteGrid palette={theme.palette} size="sm" />
     </div>
   </a>
 </article>

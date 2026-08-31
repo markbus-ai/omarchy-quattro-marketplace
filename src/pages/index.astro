@@ -14,27 +14,30 @@ const registry: ThemeRegistry = await import('../../registry.json').then(
 
 <Base title="Omarchy Quattro Marketplace — Themes">
   <section class="space-y-8">
-    <header class="space-y-2">
-      <h1 class="text-4xl font-bold tracking-tight text-foreground">
+    {/* Hero */}
+    <header class="space-y-3 pb-2">
+      <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
         Theme Marketplace
       </h1>
-      <p class="text-lg text-muted-foreground">
+      <p class="max-w-2xl text-base text-muted-foreground">
         Browse and install themes for Omarchy 4. Each theme includes a complete
         24-color palette for your terminal, editor, and desktop.
       </p>
     </header>
 
-    {/* Search and Filters */}
-    <div class="space-y-6 rounded-lg border border-border bg-surface p-6">
+    {/* Search and Filters — collapsed by default on mobile */}
+    <div class="rounded-xl border border-border/50 bg-surface/50 p-4 sm:p-6">
       <SearchInput totalCount={registry.length} />
-      <FilterBar registry={registry} />
+      <div class="mt-4">
+        <FilterBar registry={registry} />
+      </div>
       <FilterCount totalCount={registry.length} />
     </div>
 
     {/* Theme Grid */}
     {registry.length > 0 ? (
       <ul
-        class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
         aria-label="Available themes"
         data-theme-grid
       >
