@@ -138,6 +138,23 @@ const installCommand = `omarchy-install-theme ${theme.slug}`;
           </dl>
         </div>
 
+        {/* Install */}
+        <div class="rounded-lg border border-border bg-background p-4">
+          <h2 class="text-sm font-medium text-muted-foreground mb-2">Install</h2>
+          <div class="flex items-center gap-2">
+            <code class="flex-1 rounded bg-surface px-3 py-2 text-xs text-foreground font-mono overflow-x-auto">
+              mkdir -p ~/.config/omarchy/themes/{theme.slug} && curl -sL https://raw.githubusercontent.com/markbus-ai/omarchy-quattro-marketplace/main/themes/{theme.slug}/colors.toml -o ~/.config/omarchy/themes/{theme.slug}/colors.toml && curl -sL https://raw.githubusercontent.com/markbus-ai/omarchy-quattro-marketplace/main/themes/{theme.slug}/theme.yaml -o ~/.config/omarchy/themes/{theme.slug}/theme.yaml && curl -sL https://raw.githubusercontent.com/markbus-ai/omarchy-quattro-marketplace/main/themes/{theme.slug}/preview.png -o ~/.config/omarchy/themes/{theme.slug}/preview.png && echo "✔ Done! Run: omarchy theme set {theme.slug}"
+            </code>
+            <button
+              class="shrink-0 rounded-md border border-border bg-background px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:border-accent/50 hover:text-accent"
+              onclick={`navigator.clipboard.writeText('mkdir -p ~/.config/omarchy/themes/${theme.slug} && curl -sL https://raw.githubusercontent.com/markbus-ai/omarchy-quattro-marketplace/main/themes/${theme.slug}/colors.toml -o ~/.config/omarchy/themes/${theme.slug}/colors.toml && curl -sL https://raw.githubusercontent.com/markbus-ai/omarchy-quattro-marketplace/main/themes/${theme.slug}/theme.yaml -o ~/.config/omarchy/themes/${theme.slug}/theme.yaml && curl -sL https://raw.githubusercontent.com/markbus-ai/omarchy-quattro-marketplace/main/themes/${theme.slug}/preview.png -o ~/.config/omarchy/themes/${theme.slug}/preview.png && echo "✔ Installed! Run: omarchy theme set ${theme.slug}"'); this.textContent='✔ Copied!'; setTimeout(()=>this.textContent='Copy',1500)`}
+            >
+              Copy
+            </button>
+          </div>
+          <p class="mt-2 text-xs text-muted-foreground">Then apply with: <code class="text-accent">omarchy theme set {theme.slug}</code></p>
+        </div>
+
         {/* Source link for submitted themes */}
         {theme.source?.repository && (
           <div class="rounded-lg border border-border bg-background p-4">
