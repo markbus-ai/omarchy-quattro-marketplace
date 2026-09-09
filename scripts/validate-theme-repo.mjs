@@ -12,7 +12,7 @@
  */
 
 import { execSync } from "node:child_process";
-import { mkdirSync, rmSync, readFileSync, existsSync } from "node:fs";
+import { mkdirSync, rmSync, readFileSync, existsSync, lstatSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 
@@ -245,12 +245,21 @@ function parseArgs() {
   return {
     repoUrl: opts.repo_url || process.env.REPO_URL || "",
     commitSha: opts.commit_sha || process.env.COMMIT_SHA || "",
+    localDir: opts.local_dir || opts.localDir || process.env.LOCAL_DIR || "",
   };
 }
 
 // ---------------------------------------------------------------------------
 // Validation
 // ---------------------------------------------------------------------------
+
+function isSymlinkNoFollow(filePath) {
+  try {
+    return lstatSync(filePath).isSymbolicLink();
+  } catch {
+    return false;
+  }
+}
 
 function validateTheme(cloneDir) {
   const report = [];
@@ -275,6 +284,10 @@ function validateTheme(cloneDir) {
 
   // Check theme.yaml
   const yamlPath = join(cloneDir, "theme.yaml");
+  if (isSymlinkNoFollow(yamlPath)) {
+    fail("`theme.yaml` must not be a symlink");
+    return { report: report.join("\n"), passCount, failCount, warnCount };
+  }
   if (!existsSync(yamlPath)) {
     fail("`theme.yaml` not found in repository root");
     return { report: report.join("\n"), passCount, failCount, warnCount };
@@ -322,6 +335,10 @@ function validateTheme(cloneDir) {
 
   // Check colors.toml
   const tomlPath = join(cloneDir, "colors.toml");
+  if (isSymlinkNoFollow(tomlPath)) {
+    fail("`colors.toml` must not be a symlink");
+    return { report: report.join("\n"), passCount, failCount, warnCount };
+  }
   if (!existsSync(tomlPath)) {
     fail("`colors.toml` not found in repository root");
     return { report: report.join("\n"), passCount, failCount, warnCount };
@@ -369,7 +386,11 @@ function validateTheme(cloneDir) {
   // Check preview image (warn only)
   const previewPng = join(cloneDir, "preview.png");
   const previewJpg = join(cloneDir, "preview.jpg");
-  if (existsSync(previewPng)) {
+  if (isSymlinkNoFollow(previewPng)) {
+    fail("`preview.png` must not be a symlink");
+  } else if (isSymlinkNoFollow(previewJpg)) {
+    fail("`preview.jpg` must not be a symlink");
+  } else if (existsSync(previewPng)) {
     pass("`preview.png` exists");
   } else if (existsSync(previewJpg)) {
     pass("`preview.jpg` exists");
@@ -385,7 +406,30 @@ function validateTheme(cloneDir) {
 // ---------------------------------------------------------------------------
 
 function main() {
-  const { repoUrl, commitSha } = parseArgs();
+  const { repoUrl, commitSha, localDir } = parseArgs();
+
+  // Local-directory mode: validate an already-cloned tree in place.
+  // Used by approve-submission.mjs to re-validate the SAME clone it is
+  // about to publish (TOCTOU fix) — no clone/fetch here.
+  if (localDir) {
+    const { report, passCount, failCount, warnCount } = validateTheme(localDir);
+    const md = [
+      `## Theme Validation Report`,
+      ``,
+      `**Directory**: ${localDir}`,
+      ``,
+      report,
+      ``,
+      `---`,
+      `**Result**: ${failCount === 0 ? "✅ PASSED" : "❌ FAILED"}`,
+      `— ${passCount} passed, ${failCount} failed, ${warnCount} warnings`,
+    ].join("\n");
+    process.stdout.write("\n" + md + "\n");
+    if (failCount > 0) {
+      process.exit(1);
+    }
+    return;
+  }
 
   if (!repoUrl) {
     process.stderr.write("Error: Missing --repo_url or REPO_URL environment variable.\n");

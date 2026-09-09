@@ -11,7 +11,7 @@
  * Exit 1: needs-fixes (blocking findings)
  */
 
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, lstatSync } from "node:fs";
 import { join, extname } from "node:path";
 
 // ---------------------------------------------------------------------------
@@ -126,7 +126,16 @@ function collectFiles(dir, files = []) {
   for (const entry of entries) {
     if (entry === ".git" || entry === "node_modules") continue;
     const fullPath = join(dir, entry);
-    const stat = statSync(fullPath);
+    // No-follow guard: never follow symlinks in attacker-controlled clones.
+    // A symlink to host paths would otherwise get content-scanned and its
+    // samples posted to the public issue comment.
+    let stat;
+    try {
+      stat = lstatSync(fullPath);
+    } catch {
+      continue;
+    }
+    if (stat.isSymbolicLink()) continue;
     if (stat.isDirectory()) {
       collectFiles(fullPath, files);
     } else if (stat.size <= MAX_FILE_SIZE) {

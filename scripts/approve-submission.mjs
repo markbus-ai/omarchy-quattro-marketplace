@@ -20,10 +20,10 @@
  * Exit 0 on success, exit 1 on error.
  */
 
-import { appendFileSync, readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, cpSync } from "node:fs";
+import { appendFileSync, readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, cpSync, lstatSync } from "node:fs";
 import { randomBytes } from "node:crypto";
-import { join, resolve } from "node:path";
-import { execSync } from "node:child_process";
+import { join, resolve, relative } from "node:path";
+import { execSync, execFileSync } from "node:child_process";
 import { parse as parseYaml } from "yaml";
 import { stringify as stringifyYaml } from "yaml";
 
@@ -114,6 +114,81 @@ function getHeadSha(repoPath) {
   }).trim();
 }
 
+function cleanupTmpDir(tmpDir) {
+  try {
+    execSync(`rm -rf "${tmpDir}"`, { stdio: "pipe" });
+  } catch {
+    // Best effort cleanup
+  }
+}
+
+function cleanupTargetDir(targetDir, themesDir) {
+  if (targetDir !== themesDir && existsSync(targetDir)) {
+    try {
+      execSync(`rm -rf "${targetDir}"`, { stdio: "pipe" });
+    } catch {
+      // Best effort cleanup
+    }
+  }
+}
+
+function abortApprove(message, tmpDir, targetDir, themesDir) {
+  process.stderr.write(`${message}\n`);
+  cleanupTmpDir(tmpDir);
+  cleanupTargetDir(targetDir, themesDir);
+  process.exit(1);
+}
+
+function findFirstSymlink(rootDir) {
+  const stack = [rootDir];
+  while (stack.length > 0) {
+    const current = stack.pop();
+    let entries;
+    try {
+      entries = readdirSync(current);
+    } catch {
+      continue;
+    }
+    for (const entry of entries) {
+      if (current === rootDir && entry === ".git") continue;
+      const fullPath = join(current, entry);
+      let stat;
+      try {
+        stat = lstatSync(fullPath);
+      } catch {
+        continue;
+      }
+      if (stat.isSymbolicLink()) {
+        return relative(rootDir, fullPath) || entry;
+      }
+      if (stat.isDirectory()) {
+        stack.push(fullPath);
+      }
+    }
+  }
+  return "";
+}
+
+function childOutputText(value) {
+  if (value === undefined || value === null) return "";
+  if (typeof value === "string") return value;
+  try {
+    return Buffer.from(value).toString("utf-8");
+  } catch {
+    return "";
+  }
+}
+
+function parseScanOutcome(stdoutText) {
+  try {
+    const parsed = JSON.parse(String(stdoutText || ""));
+    if (parsed && typeof parsed.outcome === "string") return parsed.outcome;
+  } catch {
+    // Not JSON — unknown outcome
+  }
+  return "";
+}
+
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
@@ -187,6 +262,63 @@ function main() {
   const headSha = getHeadSha(tmpDir);
   process.stdout.write(`HEAD commit: ${headSha}\n`);
 
+  // 4b. Re-validate the SAME clone at approve time (TOCTOU fix).
+  // The submission may have changed between validation and approval, so the
+  // freshly cloned tree is validated + scanned BEFORE copying anything into
+  // themes/ or updating the registry. Abort unless validation passes AND the
+  // security scan outcome is "passed".
+  const validateScript = join(resolve(process.cwd()), "scripts", "validate-theme-repo.mjs");
+  const scanScript = join(resolve(process.cwd()), "scripts", "scan-theme-security.mjs");
+  process.stdout.write("Re-validating cloned submission at approve time ...\n");
+  try {
+    execFileSync(process.execPath, [validateScript, "--local_dir", tmpDir], {
+      stdio: "pipe",
+      timeout: 60_000,
+    });
+  } catch (err) {
+    const detail = (childOutputText(err.stdout) + childOutputText(err.stderr)).trim().slice(-2000);
+    abortApprove(
+      `Error: Approve-time re-validation FAILED for ${repoUrl}@${headSha}. Aborting publish. ` +
+        `The submission changed since validation or no longer passes checks. ` +
+        `Fix and re-run validation before approving.${detail ? `\n${detail}` : ""}`,
+      tmpDir,
+      targetDir,
+      themesDir
+    );
+  }
+  process.stdout.write("Approve-time re-validation passed.\n");
+
+  process.stdout.write("Running approve-time security scan ...\n");
+  let scanOutcome = "";
+  try {
+    const scanStdout = execFileSync(process.execPath, [scanScript, tmpDir], {
+      stdio: ["pipe", "pipe", "pipe"],
+      timeout: 60_000,
+      encoding: "utf-8",
+    });
+    scanOutcome = parseScanOutcome(scanStdout);
+  } catch (err) {
+    scanOutcome = parseScanOutcome(childOutputText(err.stdout)) || "needs-fixes";
+    const detail = (childOutputText(err.stdout) + childOutputText(err.stderr)).trim().slice(-2000);
+    abortApprove(
+      `Error: Approve-time security scan outcome is "${scanOutcome}" (blocking findings). Aborting publish. ` +
+        `Fix the findings and re-run validation before approving.${detail ? `\n${detail}` : ""}`,
+      tmpDir,
+      targetDir,
+      themesDir
+    );
+  }
+  if (scanOutcome !== "passed") {
+    abortApprove(
+      `Error: Approve-time security scan outcome is "${scanOutcome || "unknown"}" (expected "passed"). Aborting publish. ` +
+        `Maintainer must triage and clear review-required first, then re-run approval.`,
+      tmpDir,
+      targetDir,
+      themesDir
+    );
+  }
+  process.stdout.write("Approve-time security scan passed.\n");
+
   // 5. Validate tmpDir/theme.yaml (exists + parses to non-null object) BEFORE mkdirSync/cpSync
   const tmpYamlPath = join(tmpDir, "theme.yaml");
   if (!existsSync(tmpYamlPath)) {
@@ -226,6 +358,17 @@ function main() {
       }
     }
     process.exit(1);
+  }
+
+  // 5b. Refuse symlinks BEFORE mkdirSync/cpSync (fail-closed, no-follow walk).
+  const symlinkRel = findFirstSymlink(tmpDir);
+  if (symlinkRel) {
+    abortApprove(
+      `Error: Refuses to publish symlinks: "${symlinkRel}" is a symbolic link. Aborting publish.`,
+      tmpDir,
+      targetDir,
+      themesDir
+    );
   }
 
   // Copy ALL theme files into themes/<slug>/ (not just 3 files)
