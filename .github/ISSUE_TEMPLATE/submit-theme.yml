@@ -1,5 +1,6 @@
 name: Submit a Theme
 description: Propose a public Omarchy 4 theme repository for the marketplace.
+title: "[Theme]: "
 labels: ["submission"]
 body:
   - type: input

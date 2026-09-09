@@ -13,6 +13,7 @@
  */
 
 import { appendFileSync, readFileSync, writeFileSync } from "node:fs";
+import { randomBytes } from "node:crypto";
 import { resolve } from "node:path";
 
 // ---------------------------------------------------------------------------
@@ -59,26 +60,39 @@ function parseArgs() {
   return opts;
 }
 
-function setOutput(key, value) {
-  const line = `${key}=${value}\n`;
-  if (GITHUB_OUTPUT) {
-    appendFileSync(GITHUB_OUTPUT, line);
-  }
-  // Always log for debugging
-  process.stdout.write(`::set-output name=${key}::${value}\n`);
+function sanitizeSingleLine(value) {
+  return String(value ?? "").replace(/[\r\n]+/g, " ").trim();
 }
 
-function isGitHubHttpsUrl(url) {
-  try {
-    const parsed = new URL(url);
-    return (
-      parsed.protocol === "https:" &&
-      parsed.hostname === "github.com" &&
-      parsed.pathname.split("/").filter(Boolean).length >= 2
-    );
-  } catch {
-    return false;
+function setOutput(key, value) {
+  const str = String(value ?? "");
+  if (GITHUB_OUTPUT) {
+    if (str.includes("\n") || str.includes("\r")) {
+      let delimiter = `EOF_${randomBytes(16).toString("hex")}`;
+      while (str.includes(delimiter)) {
+        delimiter = `EOF_${randomBytes(16).toString("hex")}`;
+      }
+      appendFileSync(GITHUB_OUTPUT, `${key}<<${delimiter}\n${str}\n${delimiter}\n`);
+    } else {
+      appendFileSync(GITHUB_OUTPUT, `${key}=${str}\n`);
+    }
   }
+  // Always log for debugging (single-line sanitized to avoid log injection)
+  process.stdout.write(`::set-output name=${key}::${sanitizeSingleLine(str)}\n`);
+}
+
+function normalizeRepoUrl(raw) {
+  if (!raw) return "";
+  let v = String(raw).trim().split("#")[0].split("?")[0].trim();
+  v = v.replace(/\/+$/, "");
+  if (v.toLowerCase().endsWith(".git")) {
+    v = v.slice(0, -4);
+  }
+  return v.replace(/\/+$/, "");
+}
+
+function isStrictGitHubRepoUrl(url) {
+  return /^https:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/?$/.test(url);
 }
 
 // ---------------------------------------------------------------------------
@@ -96,18 +110,23 @@ function main() {
     process.exit(1);
   }
 
-  // Validate title prefix
-  if (!title.startsWith("[Theme]:")) {
+  // Title prefix is preferred but not required: issues created from the
+  // submission template may carry a plain title (GitHub does not enforce
+  // a title pattern, and the template label may be silently dropped).
+  // Fall back to the full trimmed title instead of failing so existing
+  // issues (e.g. #9, #10) still validate.
+  let themeName;
+  if (title.startsWith("[Theme]:")) {
+    // Extract theme name from title: "[Theme]: My Theme Name" -> "My Theme Name"
+    themeName = sanitizeSingleLine(title.replace(/^\[Theme\]:\s*/, ""));
+  } else {
     process.stderr.write(
-      `Error: Issue title does not start with "[Theme]:". Got: "${title}"\n`
+      `Warning: Issue title does not start with "[Theme]:". Using full title as theme name. Got: "${sanitizeSingleLine(title)}"\n`
     );
-    process.exit(1);
+    themeName = sanitizeSingleLine(title);
   }
-
-  // Extract theme name from title: "[Theme]: My Theme Name" -> "My Theme Name"
-  const themeName = title.replace(/^\[Theme\]:\s*/, "").trim();
   if (!themeName) {
-    process.stderr.write("Error: Theme name is empty after prefix.\n");
+    process.stderr.write("Error: Theme name is empty.\n");
     process.exit(1);
   }
 
@@ -117,16 +136,20 @@ function main() {
   }
 
   // Parse fields from the issue body
-  const repoUrl = extractField(body, "Repository URL");
-  const mood = extractField(body, "Theme Mood");
-  const colorFamily = extractField(body, "Color Family");
-  const tagsRaw = extractField(body, "Tags");
-  const description = extractField(body, "Theme Description");
+  const repoUrlRaw = extractField(body, "Repository URL");
+  const repoUrl = normalizeRepoUrl(repoUrlRaw);
+  const mood = sanitizeSingleLine(extractField(body, "Theme Mood"));
+  const colorFamily = sanitizeSingleLine(extractField(body, "Color Family"));
+  const tagsRaw = sanitizeSingleLine(extractField(body, "Tags"));
+  const description = extractField(body, "Theme Description").trim();
 
-  // Validate repository URL
-  if (!repoUrl || !isGitHubHttpsUrl(repoUrl)) {
+  // Validate repository URL against a strict allowlist. The value comes
+  // from the issue body (attacker-controlled) and is later used in shell
+  // commands, so only owner/repo characters are permitted. Normalization
+  // strips a trailing .git, slashes, and query/fragment first.
+  if (!repoUrl || !isStrictGitHubRepoUrl(repoUrl)) {
     process.stderr.write(
-      `Error: Invalid or missing Repository URL. Expected a public GitHub HTTPS URL. Got: "${repoUrl}"\n`
+      `Error: Invalid or missing Repository URL. Expected https://github.com/<owner>/<repo>. Got: "${sanitizeSingleLine(repoUrlRaw)}"\n`
     );
     process.exit(1);
   }

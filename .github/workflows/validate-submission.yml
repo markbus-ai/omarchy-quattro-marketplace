@@ -16,10 +16,15 @@ jobs:
   validate:
     name: Validate Theme Submission
     runs-on: ubuntu-latest
-    # Only run for submission issues
+    # Only run for submission issues. The body-based fallback covers issues
+    # created from the submission template that lack the title prefix and
+    # the 'submission' label (e.g. when the label does not exist in the repo
+    # and GitHub silently drops template labels).
     if: >-
       startsWith(github.event.issue.title, '[Theme]:') ||
-      contains(github.event.issue.labels.*.name, 'submission')
+      contains(github.event.issue.labels.*.name, 'submission') ||
+      (contains(github.event.issue.body, 'Repository URL') &&
+       contains(github.event.issue.body, 'Theme Mood'))
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -48,33 +53,37 @@ jobs:
           # Use HEAD for now — the submitter's latest commit
           COMMIT_SHA: HEAD
         run: |
+          set -o pipefail
           # Get the default branch's HEAD from the submitted repo
-          DEFAULT_BRANCH=$(git ls-remote --symref "${{ steps.intake.outputs.repo_url }}.git" HEAD | head -1 | awk '{print $1}')
+          DEFAULT_BRANCH=$(git ls-remote --symref "$REPO_URL.git" HEAD | head -1 | awk '{print $1}')
           echo "commit_sha=${DEFAULT_BRANCH}" >> "$GITHUB_OUTPUT"
 
           # Run validation and capture output
           node scripts/validate-theme-repo.mjs \
-            --repo_url "${{ steps.intake.outputs.repo_url }}" \
-            --commit_sha "${DEFAULT_BRANCH}" \
+            --repo_url "$REPO_URL" \
+            --commit_sha "$DEFAULT_BRANCH" \
             | tee /tmp/validation-report.md
 
-          # Capture exit code
-          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+          # Capture exit code of node (not tee) via PIPESTATUS
+          echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
 
       - name: Security scan
         id: security
         if: steps.intake.outputs.should_validate == 'true'
+        env:
+          REPO_URL: ${{ steps.intake.outputs.repo_url }}
         run: |
+          set -o pipefail
           # Clone the submitted repo for scanning
           REPO_DIR="/tmp/theme-scan"
           rm -rf "$REPO_DIR"
-          git clone --depth 1 "${{ steps.intake.outputs.repo_url }}.git" "$REPO_DIR" 2>/dev/null
+          git clone --depth 1 "$REPO_URL.git" "$REPO_DIR" 2>/dev/null
 
           # Run security scan
           node scripts/scan-theme-security.mjs "$REPO_DIR" | tee /tmp/security-report.json
 
-          # Capture exit code
-          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+          # Capture exit code of the scan (not tee) via PIPESTATUS
+          echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
 
           # Cleanup
           rm -rf "$REPO_DIR"
@@ -83,26 +92,31 @@ jobs:
         if: always() && steps.intake.outputs.should_validate == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          THEME_NAME: ${{ steps.intake.outputs.theme_name }}
+          REPO_URL: ${{ steps.intake.outputs.repo_url }}
+          VALIDATION_EXIT: ${{ steps.validate.outputs.exit_code }}
+          SECURITY_EXIT: ${{ steps.security.outputs.exit_code }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
           # Build the report file with status header
           {
             echo "<!-- validation-report -->"
             echo "## 🔍 Automated Validation"
             echo ""
-            if [ "${{ steps.validate.outputs.exit_code }}" = "0" ]; then
+            if [ "$VALIDATION_EXIT" = "0" ]; then
               echo "**Validation**: ✅ All checks passed"
             else
               echo "**Validation**: ❌ Issues found — please fix and re-trigger"
             fi
             echo ""
-            if [ "${{ steps.security.outputs.exit_code }}" = "0" ]; then
+            if [ "$SECURITY_EXIT" = "0" ]; then
               echo "**Security**: ✅ Scan passed"
             else
               echo "**Security**: ❌ Security issues found — please fix"
             fi
             echo ""
-            echo "**Theme**: ${{ steps.intake.outputs.theme_name }}"
-            echo "**Repository**: ${{ steps.intake.outputs.repo_url }}"
+            echo "**Theme**: $THEME_NAME"
+            echo "**Repository**: $REPO_URL"
             echo ""
             echo "<details>"
             echo "<summary>Validation report</summary>"
@@ -120,7 +134,7 @@ jobs:
           } > /tmp/final-report.md
 
           node scripts/publish-report.mjs \
-            --issue=${{ github.event.issue.number }} \
+            --issue="$ISSUE_NUMBER" \
             --file=/tmp/final-report.md \
             --marker="<!-- validation-report -->"
 
@@ -128,12 +142,10 @@ jobs:
         if: always() && steps.intake.outputs.should_validate == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          VALIDATION_OK: ${{ steps.validate.outputs.exit_code == '0' }}
+          SECURITY_OK: ${{ steps.security.outputs.exit_code == '0' }}
         run: |
-          ISSUE_NUMBER=${{ github.event.issue.number }}
-
-          VALIDATION_OK="${{ steps.validate.outputs.exit_code == '0' }}"
-          SECURITY_OK="${{ steps.security.outputs.exit_code == '0' }}"
-
           if [ "$VALIDATION_OK" = "true" ] && [ "$SECURITY_OK" = "true" ]; then
             # Both passed — add validated, remove needs-fixes
             gh issue edit "$ISSUE_NUMBER" --add-label "validated" 2>/dev/null || true

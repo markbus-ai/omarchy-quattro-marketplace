@@ -21,6 +21,7 @@
  */
 
 import { appendFileSync, readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, cpSync } from "node:fs";
+import { randomBytes } from "node:crypto";
 import { join, resolve } from "node:path";
 import { execSync } from "node:child_process";
 import { parse as parseYaml } from "yaml";
@@ -54,25 +55,38 @@ function escapeRegex(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function setOutput(key, value) {
-  const line = `${key}=${value}\n`;
-  if (GITHUB_OUTPUT) {
-    appendFileSync(GITHUB_OUTPUT, line);
-  }
-  process.stdout.write(`::set-output name=${key}::${value}\n`);
+function sanitizeSingleLine(value) {
+  return String(value ?? "").replace(/[\r\n]+/g, " ").trim();
 }
 
-function isGitHubHttpsUrl(url) {
-  try {
-    const parsed = new URL(url);
-    return (
-      parsed.protocol === "https:" &&
-      parsed.hostname === "github.com" &&
-      parsed.pathname.split("/").filter(Boolean).length >= 2
-    );
-  } catch {
-    return false;
+function setOutput(key, value) {
+  const str = String(value ?? "");
+  if (GITHUB_OUTPUT) {
+    if (str.includes("\n") || str.includes("\r")) {
+      let delimiter = `EOF_${randomBytes(16).toString("hex")}`;
+      while (str.includes(delimiter)) {
+        delimiter = `EOF_${randomBytes(16).toString("hex")}`;
+      }
+      appendFileSync(GITHUB_OUTPUT, `${key}<<${delimiter}\n${str}\n${delimiter}\n`);
+    } else {
+      appendFileSync(GITHUB_OUTPUT, `${key}=${str}\n`);
+    }
   }
+  process.stdout.write(`::set-output name=${key}::${sanitizeSingleLine(str)}\n`);
+}
+
+function normalizeRepoUrl(raw) {
+  if (!raw) return "";
+  let v = String(raw).trim().split("#")[0].split("?")[0].trim();
+  v = v.replace(/\/+$/, "");
+  if (v.toLowerCase().endsWith(".git")) {
+    v = v.slice(0, -4);
+  }
+  return v.replace(/\/+$/, "");
+}
+
+function isStrictGitHubRepoUrl(url) {
+  return /^https:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/?$/.test(url);
 }
 
 function deriveSlug(themeName) {
@@ -115,26 +129,28 @@ function main() {
     process.exit(1);
   }
   if (!ISSUE_TITLE.startsWith("[Theme]:")) {
-    process.stderr.write(`Error: Issue title must start with "[Theme]:". Got: "${ISSUE_TITLE}"\n`);
-    process.exit(1);
+    process.stderr.write(`Warning: Issue title does not start with "[Theme]:". Using full title as theme name. Got: "${sanitizeSingleLine(ISSUE_TITLE)}"\n`);
   }
 
-  // 2. Parse theme name and metadata from issue
-  const themeName = ISSUE_TITLE.replace(/^\[Theme\]:\s*/, "").trim();
+  // 2. Parse theme name and metadata from issue (tolerant fallback matches intake)
+  const themeName = ISSUE_TITLE.startsWith("[Theme]:")
+    ? sanitizeSingleLine(ISSUE_TITLE.replace(/^\[Theme\]:\s*/, ""))
+    : sanitizeSingleLine(ISSUE_TITLE);
   if (!themeName) {
-    process.stderr.write("Error: Theme name is empty after prefix.\n");
+    process.stderr.write("Error: Theme name is empty.\n");
     process.exit(1);
   }
 
   const slug = deriveSlug(themeName);
-  const repoUrl = extractField(ISSUE_BODY, "Repository URL");
-  const mood = extractField(ISSUE_BODY, "Theme Mood");
-  const colorFamily = extractField(ISSUE_BODY, "Color Family");
-  const tagsRaw = extractField(ISSUE_BODY, "Tags");
-  const description = extractField(ISSUE_BODY, "Theme Description");
+  const repoUrlRaw = extractField(ISSUE_BODY, "Repository URL");
+  const repoUrl = normalizeRepoUrl(repoUrlRaw);
+  const mood = sanitizeSingleLine(extractField(ISSUE_BODY, "Theme Mood"));
+  const colorFamily = sanitizeSingleLine(extractField(ISSUE_BODY, "Color Family"));
+  const tagsRaw = sanitizeSingleLine(extractField(ISSUE_BODY, "Tags"));
+  const description = extractField(ISSUE_BODY, "Theme Description").trim();
 
-  if (!repoUrl || !isGitHubHttpsUrl(repoUrl)) {
-    process.stderr.write(`Error: Invalid or missing Repository URL. Got: "${repoUrl}"\n`);
+  if (!repoUrl || !isStrictGitHubRepoUrl(repoUrl)) {
+    process.stderr.write(`Error: Invalid or missing Repository URL. Expected https://github.com/<owner>/<repo>. Got: "${sanitizeSingleLine(repoUrlRaw)}"\n`);
     process.exit(1);
   }
 
