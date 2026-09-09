@@ -54,22 +54,23 @@ jobs:
           COMMIT_SHA: HEAD
         run: |
           set -o pipefail
-          # Get the default branch's HEAD from the submitted repo
-          DEFAULT_BRANCH=$(git ls-remote --symref "$REPO_URL.git" HEAD | head -1 | awk '{print $1}')
-          echo "commit_sha=${DEFAULT_BRANCH}" >> "$GITHUB_OUTPUT"
+          # Get HEAD SHA from the submitted repo (ls-remote HEAD -> "<sha>\tHEAD")
+          COMMIT_SHA=$(git ls-remote "$REPO_URL.git" HEAD | awk '{print $1}')
+          echo "commit_sha=${COMMIT_SHA}" >> "$GITHUB_OUTPUT"
 
-          # Run validation and capture output
+          # Run validation and capture output (|| true keeps job alive so
+          # security scan still runs; real status goes to exit_code output)
           node scripts/validate-theme-repo.mjs \
             --repo_url "$REPO_URL" \
-            --commit_sha "$DEFAULT_BRANCH" \
-            | tee /tmp/validation-report.md
+            --commit_sha "$COMMIT_SHA" \
+            | tee /tmp/validation-report.md || true
 
           # Capture exit code of node (not tee) via PIPESTATUS
           echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
 
       - name: Security scan
         id: security
-        if: steps.intake.outputs.should_validate == 'true'
+        if: always() && steps.intake.outputs.should_validate == 'true'
         env:
           REPO_URL: ${{ steps.intake.outputs.repo_url }}
         run: |
@@ -79,8 +80,8 @@ jobs:
           rm -rf "$REPO_DIR"
           git clone --depth 1 "$REPO_URL.git" "$REPO_DIR" 2>/dev/null
 
-          # Run security scan
-          node scripts/scan-theme-security.mjs "$REPO_DIR" | tee /tmp/security-report.json
+          # Run security scan (|| true keeps job alive; status via exit_code)
+          node scripts/scan-theme-security.mjs "$REPO_DIR" | tee /tmp/security-report.json || true
 
           # Capture exit code of the scan (not tee) via PIPESTATUS
           echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
