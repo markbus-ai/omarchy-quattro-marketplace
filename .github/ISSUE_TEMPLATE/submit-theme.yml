@@ -17,12 +17,14 @@ body:
       label: Theme Mood
       description: Select the primary mood of your theme.
       options:
-        - Dark
-        - Light
-        - Colorful
-        - Muted
-        - Warm
-        - Cool
+        - dark
+        - light
+        - warm
+        - cool
+        - neon
+        - pastel
+        - earthy
+        - monochrome
     validations:
       required: true
   - type: dropdown
@@ -31,15 +33,15 @@ body:
       label: Color Family
       description: Select the dominant color family.
       options:
-        - Blue
-        - Green
-        - Red
-        - Purple
-        - Orange
-        - Yellow
-        - Pink
-        - Gray
-        - Multi
+        - red
+        - orange
+        - yellow
+        - green
+        - cyan
+        - blue
+        - purple
+        - pink
+        - neutral
     validations:
       required: true
   - type: input

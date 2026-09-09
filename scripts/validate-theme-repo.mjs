@@ -59,7 +59,19 @@ function parseSimpleYaml(text) {
   let arrayItems = [];
 
   for (const rawLine of lines) {
-    const line = rawLine.replace(/\r$/, "").replace(/#.*$/, "").trimEnd();
+    const noCr = rawLine.replace(/\r$/, "");
+    // Strip trailing inline comments, but only when `#` is outside
+    // single/double quotes so quoted values like "#RRGGBB" survive.
+    let uncommented = "";
+    let inSingle = false;
+    let inDouble = false;
+    for (const ch of noCr) {
+      if (ch === "'" && !inDouble) inSingle = !inSingle;
+      else if (ch === '"' && !inSingle) inDouble = !inDouble;
+      if (ch === "#" && !inSingle && !inDouble) break;
+      uncommented += ch;
+    }
+    const line = uncommented.trimEnd();
     const stripped = line.trim();
 
     if (!stripped) continue;
@@ -106,8 +118,50 @@ function parseSimpleYaml(text) {
   return result;
 }
 
+function parseFlowArray(val) {
+  const inner = val.slice(1, -1).trim();
+  if (!inner) return [];
+  const parts = [];
+  let cur = "";
+  let inSingle = false;
+  let inDouble = false;
+  for (const ch of inner) {
+    if (ch === "'" && !inDouble) {
+      inSingle = !inSingle;
+      cur += ch;
+      continue;
+    }
+    if (ch === '"' && !inSingle) {
+      inDouble = !inDouble;
+      cur += ch;
+      continue;
+    }
+    if (ch === "," && !inSingle && !inDouble) {
+      parts.push(cur);
+      cur = "";
+      continue;
+    }
+    cur += ch;
+  }
+  parts.push(cur);
+  return parts
+    .map((s) => s.trim())
+    .filter((s) => s !== "")
+    .map((s) => {
+      if (s.length >= 2 && ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'")))) {
+        return s.slice(1, -1).trim();
+      }
+      return s;
+    })
+    .filter((s) => s !== "");
+}
+
 function parseScalar(val) {
   if (val === "") return "";
+  // YAML flow sequence: key: ["a", "b"] or key: [a, b]
+  if (/^\[.*\]$/.test(val)) {
+    return parseFlowArray(val);
+  }
   // Remove surrounding quotes
   if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
     return val.slice(1, -1);
@@ -133,6 +187,15 @@ function parseSimpleToml(text) {
 
     // Skip comments and empty lines
     if (!line || line.startsWith("#")) continue;
+
+    // Bare hex values (`key = #RRGGBB`) are values, not comments —
+    // handle before comment stripping so the `#...` is preserved.
+    // An optional trailing comment after the bare hex is allowed.
+    const bareHex = line.match(/^([A-Za-z0-9_]+)\s*=\s*(#\w+)\s*(?:#.*)?$/);
+    if (bareHex) {
+      result[bareHex[1]] = bareHex[2];
+      continue;
+    }
 
     // Strip trailing inline comments (TOML allows `key = "value" # comment`).
     // Only treat `#` as a comment when outside single/double quotes, so
@@ -237,9 +300,12 @@ function validateTheme(cloneDir) {
     }
   }
 
-  // Validate mood values
+  // Validate mood values (strict: non-empty array, case-sensitive
+  // membership in MOOD_VALUES — must match src/data/theme-schema.ts)
   const validMoods = ["dark", "light", "warm", "cool", "neon", "pastel", "earthy", "monochrome"];
-  if (Array.isArray(yamlData.mood)) {
+  if (!Array.isArray(yamlData.mood) || yamlData.mood.length === 0) {
+    fail(`Invalid mood: expected a non-empty array. Valid: ${validMoods.join(", ")}`);
+  } else {
     const invalidMoods = yamlData.mood.filter((m) => !validMoods.includes(m));
     if (invalidMoods.length > 0) {
       fail(`Invalid mood values: ${invalidMoods.join(", ")}. Valid: ${validMoods.join(", ")}`);

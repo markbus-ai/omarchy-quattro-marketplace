@@ -24,6 +24,7 @@ jobs:
             "submission:#0075ca"
             "validated:#0e8a16"
             "needs-fixes:#d93f0b"
+            "needs-review:#fbca04"
             "approved-and-verified:#5319e7"
             "listed:#1a7f37"
             "update-pending:#fbca04"

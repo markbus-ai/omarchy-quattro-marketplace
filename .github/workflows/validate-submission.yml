@@ -20,12 +20,34 @@ jobs:
     # created from the submission template that lack the title prefix and
     # the 'submission' label (e.g. when the label does not exist in the repo
     # and GitHub silently drops template labels).
+    # Bot label writes retrigger validation via `labeled` events, so those
+    # only proceed for the 'submission' label; opened/edited are unaffected.
     if: >-
-      startsWith(github.event.issue.title, '[Theme]:') ||
+      (github.event.action != 'labeled' || github.event.label.name == 'submission') &&
+      (startsWith(github.event.issue.title, '[Theme]:') ||
       contains(github.event.issue.labels.*.name, 'submission') ||
       (contains(github.event.issue.body, 'Repository URL') &&
-       contains(github.event.issue.body, 'Theme Mood'))
+       contains(github.event.issue.body, 'Theme Mood')))
     steps:
+      - name: Heal missing submission label
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          HAS_LABEL: ${{ contains(github.event.issue.labels.*.name, 'submission') }}
+        run: |
+          if [ "$HAS_LABEL" = "true" ]; then
+            echo "submission label already present"
+            exit 0
+          fi
+          if printf '%s' "$ISSUE_BODY" | grep -q "Repository URL" && printf '%s' "$ISSUE_BODY" | grep -q "Theme Mood"; then
+            gh label create submission --color 0075ca --description "Submission workflow label" 2>/dev/null || true
+            gh issue edit "$ISSUE_NUMBER" --add-label "submission" 2>/dev/null || true
+            echo "Healed missing 'submission' label"
+          else
+            echo "Not a submission issue — skipping label heal"
+          fi
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -43,15 +65,43 @@ jobs:
         env:
           ISSUE_TITLE: ${{ github.event.issue.title }}
           ISSUE_BODY: ${{ github.event.issue.body }}
-        run: node scripts/intake-submission.mjs
+        run: |
+          set +e
+          node scripts/intake-submission.mjs 2> /tmp/intake-stderr.log
+          INTAKE_EXIT=$?
+          cat /tmp/intake-stderr.log >&2 || true
+          exit $INTAKE_EXIT
+
+      - name: Report intake failure
+        if: always() && steps.intake.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          MSG=$(cat /tmp/intake-stderr.log 2>/dev/null || echo "Intake failed with no details.")
+          {
+            echo "<!-- intake-failure -->"
+            echo "❌ **Submission intake failed** — please check your issue fields and re-trigger."
+            echo ""
+            echo "<details>"
+            echo "<summary>Intake error</summary>"
+            echo ""
+            echo '```'
+            echo "$MSG"
+            echo '```'
+            echo ""
+            echo "</details>"
+          } > /tmp/intake-failure.md
+          node scripts/publish-report.mjs \
+            --issue="$ISSUE_NUMBER" \
+            --file=/tmp/intake-failure.md \
+            --marker="<!-- intake-failure -->" || true
 
       - name: Validate theme repository
         id: validate
         if: steps.intake.outputs.should_validate == 'true'
         env:
           REPO_URL: ${{ steps.intake.outputs.repo_url }}
-          # Use HEAD for now — the submitter's latest commit
-          COMMIT_SHA: HEAD
         run: |
           # errexit off: theme failures must not abort the step before we
           # record the exit code (and `|| true` would clobber PIPESTATUS).
@@ -59,6 +109,12 @@ jobs:
           set -o pipefail
           # Get HEAD SHA from the submitted repo (ls-remote HEAD -> "<sha>\tHEAD")
           COMMIT_SHA=$(git ls-remote "$REPO_URL.git" HEAD | awk '{print $1}')
+          if ! printf '%s' "$COMMIT_SHA" | grep -Eq '^[0-9a-fA-F]{40}$'; then
+            echo "commit_sha=" >> "$GITHUB_OUTPUT"
+            echo "exit_code=1" >> "$GITHUB_OUTPUT"
+            echo "ERROR: Could not resolve HEAD SHA for $REPO_URL (got: '$COMMIT_SHA'). Aborting validation." >&2
+            exit 1
+          fi
           echo "commit_sha=${COMMIT_SHA}" >> "$GITHUB_OUTPUT"
 
           # Run validation and capture output
@@ -83,7 +139,14 @@ jobs:
           # Clone the submitted repo for scanning
           REPO_DIR="/tmp/theme-scan"
           rm -rf "$REPO_DIR"
-          git clone --depth 1 "$REPO_URL.git" "$REPO_DIR" 2>/dev/null
+          if ! git clone --depth 1 "$REPO_URL.git" "$REPO_DIR" 2>/dev/null; then
+            SCAN_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+            printf '{"scan_version":"1.0.0","scanned_at":"%s","files_scanned":0,"outcome":"clone-failed","findings":[],"capabilities":[],"summary":{"findings_count":0,"critical":0,"high":0,"medium":0,"capabilities_count":0},"error":"Failed to clone repository for security scan"}' "$SCAN_AT" | tee /tmp/security-report.json
+            echo "exit_code=1" >> "$GITHUB_OUTPUT"
+            echo "ERROR: Failed to clone $REPO_URL for security scan." >&2
+            rm -rf "$REPO_DIR"
+            exit 1
+          fi
 
           # Run security scan
           node scripts/scan-theme-security.mjs "$REPO_DIR" | tee /tmp/security-report.json
@@ -101,9 +164,11 @@ jobs:
           THEME_NAME: ${{ steps.intake.outputs.theme_name }}
           REPO_URL: ${{ steps.intake.outputs.repo_url }}
           VALIDATION_EXIT: ${{ steps.validate.outputs.exit_code }}
-          SECURITY_EXIT: ${{ steps.security.outputs.exit_code }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
+          # Parse security outcome so review-required (exit 0) is not
+          # collapsed into a pass; unknown when the report is missing.
+          SECURITY_OUTCOME=$(python3 -c "import json; print(json.load(open('/tmp/security-report.json')).get('outcome','unknown'))" 2>/dev/null || echo "unknown")
           # Build the report file with status header
           {
             echo "<!-- validation-report -->"
@@ -115,8 +180,12 @@ jobs:
               echo "**Validation**: ❌ Issues found — please fix and re-trigger"
             fi
             echo ""
-            if [ "$SECURITY_EXIT" = "0" ]; then
+            if [ "$SECURITY_OUTCOME" = "passed" ]; then
               echo "**Security**: ✅ Scan passed"
+            elif [ "$SECURITY_OUTCOME" = "review-required" ]; then
+              echo "**Security**: ⚠️ Scan requires maintainer review"
+            elif [ "$SECURITY_OUTCOME" = "clone-failed" ]; then
+              echo "**Security**: ❌ Scan failed — could not clone repository (infra failure)"
             else
               echo "**Security**: ❌ Security issues found — please fix"
             fi
@@ -127,7 +196,7 @@ jobs:
             echo "<details>"
             echo "<summary>Validation report</summary>"
             echo ""
-            cat /tmp/validation-report.md
+            cat /tmp/validation-report.md 2>/dev/null || echo "No validation report generated"
             echo ""
             echo "</details>"
             echo ""
@@ -152,14 +221,23 @@ jobs:
           VALIDATION_OK: ${{ steps.validate.outputs.exit_code == '0' }}
           SECURITY_OK: ${{ steps.security.outputs.exit_code == '0' }}
         run: |
-          if [ "$VALIDATION_OK" = "true" ] && [ "$SECURITY_OK" = "true" ]; then
-            # Both passed — add validated, remove needs-fixes
+          SECURITY_OUTCOME=$(python3 -c "import json; print(json.load(open('/tmp/security-report.json')).get('outcome','unknown'))" 2>/dev/null || echo "unknown")
+          if [ "$VALIDATION_OK" = "true" ] && [ "$SECURITY_OK" = "true" ] && [ "$SECURITY_OUTCOME" = "passed" ]; then
+            # Fully passed (review-required counts as not passed) — add validated, remove needs-fixes/needs-review
             gh issue edit "$ISSUE_NUMBER" --add-label "validated" 2>/dev/null || true
             gh issue edit "$ISSUE_NUMBER" --remove-label "needs-fixes" 2>/dev/null || true
+            gh issue edit "$ISSUE_NUMBER" --remove-label "needs-review" 2>/dev/null || true
             echo "✅ Added 'validated' label"
+          elif [ "$SECURITY_OUTCOME" = "review-required" ]; then
+            # Scan requires maintainer review — use distinct needs-review label instead of needs-fixes
+            gh issue edit "$ISSUE_NUMBER" --add-label "needs-review" 2>/dev/null || true
+            gh issue edit "$ISSUE_NUMBER" --remove-label "validated" 2>/dev/null || true
+            gh issue edit "$ISSUE_NUMBER" --remove-label "needs-fixes" 2>/dev/null || true
+            echo "⚠️ Added 'needs-review' label"
           else
-            # One or both failed — add needs-fixes, remove validated
+            # Failed — add needs-fixes, remove validated/needs-review
             gh issue edit "$ISSUE_NUMBER" --add-label "needs-fixes" 2>/dev/null || true
             gh issue edit "$ISSUE_NUMBER" --remove-label "validated" 2>/dev/null || true
+            gh issue edit "$ISSUE_NUMBER" --remove-label "needs-review" 2>/dev/null || true
             echo "❌ Added 'needs-fixes' label"
           fi

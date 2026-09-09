@@ -141,25 +141,36 @@ function scanFile(filePath) {
   const findings = [];
   const capabilities = [];
 
+  const ext = extname(filePath).toLowerCase();
+  if (BINARY_EXTENSIONS.has(ext)) return { findings, capabilities };
+  if (ext !== "" && !TEXT_EXTENSIONS.has(ext)) return { findings, capabilities };
+
   try {
     const content = readFileSync(filePath, "utf-8");
-    const ext = extname(filePath).toLowerCase();
     const isDoc = DOC_EXTENSIONS.has(ext);
 
-    // Check for findings (skipped for docs — see DOC_EXTENSIONS note above)
+    // Check for findings (docs never block: doc hits become review
+    // capabilities so the signal survives without failing the scan)
     for (const pattern of FINDING_PATTERNS) {
-      if (isDoc) continue;
       const matches = content.match(pattern.regex);
-      if (matches) {
-        findings.push({
-          id: pattern.id,
-          description: pattern.description,
-          severity: pattern.severity,
+      if (!matches) continue;
+      if (isDoc) {
+        capabilities.push({
+          id: `docs-${pattern.id}`,
+          description: `${pattern.description} (in docs)`,
           file: filePath,
           count: matches.length,
-          sample: matches[0].slice(0, 80),
         });
+        continue;
       }
+      findings.push({
+        id: pattern.id,
+        description: pattern.description,
+        severity: pattern.severity,
+        file: filePath,
+        count: matches.length,
+        sample: matches[0].slice(0, 80),
+      });
     }
 
     // Check for capabilities

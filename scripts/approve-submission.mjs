@@ -166,18 +166,69 @@ function main() {
 
   // 4. Clone the submitted repo
   const tmpDir = join(resolve(process.cwd()), ".tmp-clone");
+  try {
+    execSync(`rm -rf "${tmpDir}"`, { stdio: "pipe" });
+  } catch {
+    // Best effort cleanup of stale clone
+  }
   process.stdout.write(`Cloning ${repoUrl} ...\n`);
   try {
     cloneRepo(repoUrl, tmpDir);
   } catch (err) {
     process.stderr.write(`Error: Failed to clone repository: ${err.message}\n`);
+    try {
+      execSync(`rm -rf "${tmpDir}"`, { stdio: "pipe" });
+    } catch {
+      // Best effort cleanup
+    }
     process.exit(1);
   }
 
   const headSha = getHeadSha(tmpDir);
   process.stdout.write(`HEAD commit: ${headSha}\n`);
 
-  // 5. Copy ALL theme files into themes/<slug>/ (not just 3 files)
+  // 5. Validate tmpDir/theme.yaml (exists + parses to non-null object) BEFORE mkdirSync/cpSync
+  const tmpYamlPath = join(tmpDir, "theme.yaml");
+  if (!existsSync(tmpYamlPath)) {
+    process.stderr.write(`Error: theme.yaml not found in cloned repository.\n`);
+    try {
+      execSync(`rm -rf "${tmpDir}"`, { stdio: "pipe" });
+    } catch {
+      // Best effort cleanup
+    }
+    if (targetDir !== themesDir && existsSync(targetDir)) {
+      try {
+        execSync(`rm -rf "${targetDir}"`, { stdio: "pipe" });
+      } catch {
+        // Best effort cleanup
+      }
+    }
+    process.exit(1);
+  }
+  try {
+    const tmpContent = readFileSync(tmpYamlPath, "utf-8");
+    const tmpData = parseYaml(tmpContent);
+    if (!tmpData || typeof tmpData !== "object" || Array.isArray(tmpData)) {
+      throw new Error("theme.yaml did not parse to an object");
+    }
+  } catch (err) {
+    process.stderr.write(`Error: Failed to parse theme.yaml: ${err.message}\n`);
+    try {
+      execSync(`rm -rf "${tmpDir}"`, { stdio: "pipe" });
+    } catch {
+      // Best effort cleanup
+    }
+    if (targetDir !== themesDir && existsSync(targetDir)) {
+      try {
+        execSync(`rm -rf "${targetDir}"`, { stdio: "pipe" });
+      } catch {
+        // Best effort cleanup
+      }
+    }
+    process.exit(1);
+  }
+
+  // Copy ALL theme files into themes/<slug>/ (not just 3 files)
   mkdirSync(targetDir, { recursive: true });
 
   // Copy everything from the cloned repo except .git
@@ -191,8 +242,58 @@ function main() {
 
   // 6. Add source metadata to theme.yaml
   const yamlPath = join(targetDir, "theme.yaml");
-  const yamlContent = readFileSync(yamlPath, "utf-8");
-  const themeData = parseYaml(yamlContent);
+  if (!existsSync(yamlPath)) {
+    process.stderr.write(`Error: theme.yaml not found in cloned repository.\n`);
+    try {
+      execSync(`rm -rf "${tmpDir}"`, { stdio: "pipe" });
+    } catch {
+      // Best effort cleanup
+    }
+    if (targetDir !== themesDir && existsSync(targetDir)) {
+      try {
+        execSync(`rm -rf "${targetDir}"`, { stdio: "pipe" });
+      } catch {
+        // Best effort cleanup
+      }
+    }
+    process.exit(1);
+  }
+  let themeData;
+  try {
+    const yamlContent = readFileSync(yamlPath, "utf-8");
+    themeData = parseYaml(yamlContent);
+  } catch (err) {
+    process.stderr.write(`Error: Failed to parse theme.yaml: ${err.message}\n`);
+    try {
+      execSync(`rm -rf "${tmpDir}"`, { stdio: "pipe" });
+    } catch {
+      // Best effort cleanup
+    }
+    if (targetDir !== themesDir && existsSync(targetDir)) {
+      try {
+        execSync(`rm -rf "${targetDir}"`, { stdio: "pipe" });
+      } catch {
+        // Best effort cleanup
+      }
+    }
+    process.exit(1);
+  }
+  if (!themeData || typeof themeData !== "object" || Array.isArray(themeData)) {
+    process.stderr.write(`Error: theme.yaml did not parse to an object.\n`);
+    try {
+      execSync(`rm -rf "${tmpDir}"`, { stdio: "pipe" });
+    } catch {
+      // Best effort cleanup
+    }
+    if (targetDir !== themesDir && existsSync(targetDir)) {
+      try {
+        execSync(`rm -rf "${targetDir}"`, { stdio: "pipe" });
+      } catch {
+        // Best effort cleanup
+      }
+    }
+    process.exit(1);
+  }
 
   // Set source field
   themeData.source = {

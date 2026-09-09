@@ -154,20 +154,22 @@ function main() {
     process.exit(1);
   }
 
-  // Validate mood
-  const validMoods = ["Dark", "Light", "Colorful", "Muted", "Warm", "Cool"];
-  if (!mood || !validMoods.includes(mood)) {
+  // Validate mood (case-insensitive membership in canonical MOOD_VALUES;
+  // historic bodies use capitalized values like "Dark" and must keep passing)
+  const validMoods = ["dark", "light", "warm", "cool", "neon", "pastel", "earthy", "monochrome"];
+  if (!mood || !validMoods.includes(mood.toLowerCase())) {
     process.stderr.write(
       `Error: Invalid or missing Theme Mood. Expected one of: ${validMoods.join(", ")}. Got: "${mood}"\n`
     );
     process.exit(1);
   }
 
-  // Validate color family
+  // Validate color family (case-insensitive membership in canonical
+  // COLOR_FAMILY_VALUES; historic bodies use capitalized "Pink"/"Green")
   const validFamilies = [
-    "Blue", "Green", "Red", "Purple", "Orange", "Yellow", "Pink", "Gray", "Multi",
+    "red", "orange", "yellow", "green", "cyan", "blue", "purple", "pink", "neutral",
   ];
-  if (!colorFamily || !validFamilies.includes(colorFamily)) {
+  if (!colorFamily || !validFamilies.includes(colorFamily.toLowerCase())) {
     process.stderr.write(
       `Error: Invalid or missing Color Family. Expected one of: ${validFamilies.join(", ")}. Got: "${colorFamily}"\n`
     );
