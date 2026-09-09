@@ -53,17 +53,19 @@ jobs:
           # Use HEAD for now — the submitter's latest commit
           COMMIT_SHA: HEAD
         run: |
+          # errexit off: theme failures must not abort the step before we
+          # record the exit code (and `|| true` would clobber PIPESTATUS).
+          set +e
           set -o pipefail
           # Get HEAD SHA from the submitted repo (ls-remote HEAD -> "<sha>\tHEAD")
           COMMIT_SHA=$(git ls-remote "$REPO_URL.git" HEAD | awk '{print $1}')
           echo "commit_sha=${COMMIT_SHA}" >> "$GITHUB_OUTPUT"
 
-          # Run validation and capture output (|| true keeps job alive so
-          # security scan still runs; real status goes to exit_code output)
+          # Run validation and capture output
           node scripts/validate-theme-repo.mjs \
             --repo_url "$REPO_URL" \
             --commit_sha "$COMMIT_SHA" \
-            | tee /tmp/validation-report.md || true
+            | tee /tmp/validation-report.md
 
           # Capture exit code of node (not tee) via PIPESTATUS
           echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
@@ -74,14 +76,17 @@ jobs:
         env:
           REPO_URL: ${{ steps.intake.outputs.repo_url }}
         run: |
+          # errexit off so a failing scan still records exit_code below
+          # (`|| true` would clobber PIPESTATUS).
+          set +e
           set -o pipefail
           # Clone the submitted repo for scanning
           REPO_DIR="/tmp/theme-scan"
           rm -rf "$REPO_DIR"
           git clone --depth 1 "$REPO_URL.git" "$REPO_DIR" 2>/dev/null
 
-          # Run security scan (|| true keeps job alive; status via exit_code)
-          node scripts/scan-theme-security.mjs "$REPO_DIR" | tee /tmp/security-report.json || true
+          # Run security scan
+          node scripts/scan-theme-security.mjs "$REPO_DIR" | tee /tmp/security-report.json
 
           # Capture exit code of the scan (not tee) via PIPESTATUS
           echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"

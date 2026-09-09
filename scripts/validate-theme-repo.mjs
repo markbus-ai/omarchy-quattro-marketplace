@@ -134,8 +134,23 @@ function parseSimpleToml(text) {
     // Skip comments and empty lines
     if (!line || line.startsWith("#")) continue;
 
+    // Strip trailing inline comments (TOML allows `key = "value" # comment`).
+    // Only treat `#` as a comment when outside single/double quotes, so
+    // values like "#RRGGBB" are preserved.
+    let uncommented = "";
+    let inSingle = false;
+    let inDouble = false;
+    for (const ch of line) {
+      if (ch === "'" && !inDouble) inSingle = !inSingle;
+      else if (ch === '"' && !inSingle) inDouble = !inDouble;
+      if (ch === "#" && !inSingle && !inDouble) break;
+      uncommented += ch;
+    }
+    const clean = uncommented.trim();
+    if (!clean) continue;
+
     // Handle key = "value" or key = '#RRGGBB'
-    const match = line.match(/^([a-zA-Z0-9_]+)\s*=\s*(".*?"|'.*?'|#\w+)$/);
+    const match = clean.match(/^([a-zA-Z0-9_]+)\s*=\s*(".*?"|'.*?'|#\w+)$/);
     if (match) {
       const key = match[1];
       let val = match[2];

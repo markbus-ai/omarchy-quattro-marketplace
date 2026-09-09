@@ -33,6 +33,12 @@ const BINARY_EXTENSIONS = new Set([
   ".mp3", ".mp4", ".wav",
 ]);
 
+// Docs are never executed by a theme install, so execution-context
+// patterns (sudo, eval, rm -rf, env reads) in prose/README install
+// instructions would be false positives. Docs are still scanned for
+// capabilities below; only code/config files produce blocking findings.
+const DOC_EXTENSIONS = new Set([".md", ".txt"]);
+
 // ---------------------------------------------------------------------------
 // Patterns to detect (findings = blocking)
 // ---------------------------------------------------------------------------
@@ -138,9 +144,11 @@ function scanFile(filePath) {
   try {
     const content = readFileSync(filePath, "utf-8");
     const ext = extname(filePath).toLowerCase();
+    const isDoc = DOC_EXTENSIONS.has(ext);
 
-    // Check for findings
+    // Check for findings (skipped for docs — see DOC_EXTENSIONS note above)
     for (const pattern of FINDING_PATTERNS) {
+      if (isDoc) continue;
       const matches = content.match(pattern.regex);
       if (matches) {
         findings.push({
