@@ -35,9 +35,18 @@ const BINARY_EXTENSIONS = new Set([
 
 // Docs are never executed by a theme install, so execution-context
 // patterns (sudo, eval, rm -rf, env reads) in prose/README install
-// instructions would be false positives. Docs are still scanned for
-// capabilities below; only code/config files produce blocking findings.
+// instructions would be false positives. Docs hits become `docs-*`
+// capabilities (logged for transparency); only code/config files produce
+// blocking findings. `docs-sudo-pkexec` is informational only and does not
+// affect the outcome — README install instructions routinely mention sudo.
 const DOC_EXTENSIONS = new Set([".md", ".txt"]);
+
+// Docs-only capabilities that are informational and never affect the outcome.
+// `docs-sudo-pkexec`: sudo/pkexec mentioned in README/prose install
+// instructions (e.g. `sudo install ...`) is not executed by a theme install.
+// Kept in the report for transparency, but excluded from the review-required
+// decision. Code/config `sudo-pkexec` hits remain high-severity findings.
+const DOCS_INFORMATIONAL_CAPABILITIES = new Set(["docs-sudo-pkexec"]);
 
 // ---------------------------------------------------------------------------
 // Patterns to detect (findings = blocking)
@@ -228,10 +237,16 @@ function main() {
   const highFindings = allFindings.filter(f => f.severity === "high");
   const mediumFindings = allFindings.filter(f => f.severity === "medium");
 
+  // Informational docs-only capabilities (e.g. docs-sudo-pkexec) stay in the
+  // report but do not drive review-required; everything else does.
+  const blockingCapabilities = allCapabilities.filter(
+    (c) => !DOCS_INFORMATIONAL_CAPABILITIES.has(c.id)
+  );
+
   let outcome;
   if (criticalFindings.length > 0 || highFindings.length > 0) {
     outcome = "needs-fixes";
-  } else if (mediumFindings.length > 0 || allCapabilities.length > 0) {
+  } else if (mediumFindings.length > 0 || blockingCapabilities.length > 0) {
     outcome = "review-required";
   } else {
     outcome = "passed";
@@ -239,7 +254,7 @@ function main() {
 
   // Output JSON report
   const report = {
-    scan_version: "1.0.0",
+    scan_version: "1.0.1",
     scanned_at: new Date().toISOString(),
     files_scanned: files.length,
     outcome,
