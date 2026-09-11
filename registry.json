@@ -394,6 +394,56 @@
     }
   },
   {
+    "name": "solarized-japan",
+    "slug": "solarized-japan",
+    "author": "Ronak Kamboj",
+    "version": "1.0.0",
+    "description": "A dark Japanese-inspired Omarchy theme using the Solarized Osaka palette, traditional scenery, and antique-gold accents.",
+    "mood": [
+      "dark"
+    ],
+    "color_family": "green",
+    "tags": [
+      "japanese",
+      "solarized",
+      "nature"
+    ],
+    "hyprland_version": "4.0",
+    "license": "Apache-2.0",
+    "preview": "preview.png",
+    "source": {
+      "repository": "https://github.com/R7rainz/omarchy-solarized-japan",
+      "commit": "2931ae2550199e6fd8cc9da888ce3758cede9ced",
+      "approved_at": "2026-09-11T03:34:47.893Z"
+    },
+    "palette": {
+      "background": "#001419",
+      "foreground": "#adb7b7",
+      "cursor": "#fdf5e2",
+      "selection_foreground": "#fdf5e2",
+      "selection_background": "#268bd3",
+      "border": "#002c38",
+      "color0": "#001419",
+      "color1": "#db302d",
+      "color2": "#849900",
+      "color3": "#b28500",
+      "color4": "#268bd3",
+      "color5": "#d23681",
+      "color6": "#29a298",
+      "color7": "#adb7b7",
+      "color8": "#637981",
+      "color9": "#fb7673",
+      "color10": "#bcff51",
+      "color11": "#c4a15a",
+      "color12": "#78c5fb",
+      "color13": "#f961aa",
+      "color14": "#6cf8ed",
+      "color15": "#fdf5e2",
+      "accent": "#29a298",
+      "comment": "#637981"
+    }
+  },
+  {
     "name": "Tropical",
     "slug": "tropical",
     "author": "Aether",
