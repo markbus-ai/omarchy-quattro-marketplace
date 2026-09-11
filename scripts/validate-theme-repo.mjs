@@ -304,7 +304,7 @@ function validateTheme(cloneDir) {
   }
 
   // Validate required YAML fields
-  const requiredFields = ["name", "slug", "author", "version", "description", "mood", "color_family", "tags", "license", "preview"];
+  const requiredFields = ["name", "slug", "author", "version", "description", "mood", "color_family", "tags", "hyprland_version", "license", "preview"];
   for (const field of requiredFields) {
     if (yamlData[field] === undefined || yamlData[field] === null || yamlData[field] === "") {
       fail(`theme.yaml missing required field: \`${field}\``);
@@ -332,6 +332,18 @@ function validateTheme(cloneDir) {
   if (typeof yamlData.color_family === "string" && !validFamilies.includes(yamlData.color_family)) {
     fail(`Invalid color_family: "${yamlData.color_family}". Valid: ${validFamilies.join(", ")}`);
   }
+
+  // Validate hyprland_version — must agree with scripts/generate-registry.ts
+  // which requires a "4.x" format string (/^4\.[\dx]+$/). Intake fails fast here
+  // so validation passes and registry generation never disagree.
+  if (typeof yamlData.hyprland_version === "string" && yamlData.hyprland_version !== "") {
+    if (!/^4\.[\dx]+$/.test(yamlData.hyprland_version)) {
+      fail(`Invalid hyprland_version: "${yamlData.hyprland_version}". Expected "4.x" format string (e.g. "4.x")`);
+    } else {
+      pass(`hyprland_version is valid ("${yamlData.hyprland_version}")`);
+    }
+  }
+  // (missing/empty hyprland_version is already reported as a missing required field above)
 
   // Check colors.toml
   const tomlPath = join(cloneDir, "colors.toml");
