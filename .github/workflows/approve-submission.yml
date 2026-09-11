@@ -16,10 +16,12 @@ concurrency:
 
 jobs:
   approve:
+    # Retrigger-safe: trigger on `approved-and-verified` alone. A successful run
+    # removes `submission`, so requiring it would make re-adding
+    # `approved-and-verified` a no-op (job skipped).
     if: >-
       github.event.label.name == 'approved-and-verified' &&
-      github.event.issue.state == 'open' &&
-      contains(github.event.issue.labels.*.name, 'submission')
+      github.event.issue.state == 'open'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -50,6 +52,24 @@ jobs:
 
       - name: Build site
         run: npm run build
+
+      - name: Commit and push theme to main
+        env:
+          THEME_SLUG: ${{ steps.approval.outputs.theme_name }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add themes/ registry.json
+          if git diff --cached --quiet; then
+            echo "No theme/registry changes to commit."
+            exit 0
+          fi
+          git commit -m "feat: approve theme ${THEME_SLUG} (#${ISSUE_NUMBER})"
+          git pull --rebase origin main
+          git push origin HEAD:main
+          # Pushing to main triggers deploy.yml (push → build + Pages deploy),
+          # so the persisted themes/<slug>/ + registry.json goes live canonically.
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

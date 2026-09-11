@@ -60,9 +60,11 @@ Got a theme? Share it with the community!
 ### 1. Create your theme
 
 Your theme needs:
-- `theme.yaml` — metadata (name, author, mood, etc.)
+- `theme.yaml` — metadata (name, author, mood, etc., including required `hyprland_version` in `"4.x"` format)
 - `colors.toml` — 24 Omarchy 4 palette keys
 - `preview.png` — screenshot (recommended)
+
+Validation requires `hyprland_version` (same `"4.x"` format the registry enforces), so submissions fail fast at intake instead of passing validation and failing at registry generation.
 
 Use [Aether](https://github.com/bjarneo/aether) to generate a complete theme from any wallpaper.
 
@@ -76,7 +78,7 @@ Go to [Issues → Submit a Theme](https://github.com/markbus-ai/omarchy-quattro-
 
 ### 4. Wait for Approval
 
-Automated validation checks your theme. Once approved, it's live on the marketplace automatically.
+Automated validation checks your theme. Once approved, the workflow commits `themes/<slug>/` + `registry.json` to `main` (which triggers the Pages deploy), so the theme is persisted — not just published as a transient artifact — and goes live on the marketplace automatically.
 
 ---
 

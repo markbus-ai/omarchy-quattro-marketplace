@@ -65,6 +65,10 @@ a theme install. `sudo`/`pkexec` in code or config files remains a blocking
 
 Every listing and approved theme is pinned to an exact commit SHA. Install commands reference the specific approved commit, not a mutable branch or tag. This ensures the installed code matches what was reviewed.
 
+### Submission pipeline
+
+Validation requires `hyprland_version` in `"4.x"` format (same rule the registry enforces), so intake fails fast. Approval persists `themes/<slug>/` + `registry.json` to `main`, which triggers the canonical Pages deploy.
+
 ## Security Notice
 
 > Community themes are developed and maintained by independent third parties. They may modify terminal colors, window manager configs, and other desktop settings according to their implementation.
