@@ -49,9 +49,15 @@ The following detected patterns require maintainer review but are not findings:
 - **external-download**: External downloads detected
 - **file-permissions**: File permission changes
 
+Docs-only `docs-sudo-pkexec` hits (sudo/pkexec mentioned in README/prose
+install instructions) are logged in the scan report for transparency but are
+informational only and do not affect the outcome — docs are never executed by
+a theme install. `sudo`/`pkexec` in code or config files remains a blocking
+`sudo-pkexec` finding.
+
 ### Outcomes
 
-- **passed**: No findings or review capabilities detected
+- **passed**: No findings or review-affecting capabilities detected (informational docs-only capabilities may still be logged)
 - **review-required**: Review capabilities detected (requires maintainer approval)
 - **needs-fixes**: Blocking findings detected (must fix before approval)
 
